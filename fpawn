@@ -2,7 +2,7 @@
 
 # fpawn Ultra - The Ultimate Pawn CLI for Linux
 # Created for: FerzDevZ
-# Version: 9.0 (God Mode Pack)
+# Version: 9.5 (Professional Bundle Pack)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 
 # --- DIRECTORIES ---
@@ -21,130 +21,131 @@ MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# --- GOD MODE FUNCTIONS ---
+# --- CORE FUNCTIONS ---
 
 function show_help() {
-    echo -e "${BLUE}${BOLD}fpawn God Mode${NC} - v9.0"
+    echo -e "${BLUE}${BOLD}fpawn Pro Bundle${NC} - v9.5"
     echo -e "Developed by ${CYAN}${BOLD}FerzDevZ${NC}"
     echo -e ""
     echo -e "Usage: ${YELLOW}fpawn${NC} <file.pwn> [options]"
     echo ""
-    echo -e "${BOLD}God Mode Features:${NC}"
-    echo -e "  --create-server [type]  Install server binaries (legacy/omp)"
-    echo -e "  --run                   Start server with integrated runner"
-    echo -e "  --log                   View server logs in real-time"
-    echo ""
-    echo -e "${BOLD}FPM (Package Manager):${NC}"
-    echo -e "  --plugin <name>         Install .inc AND .so binaries"
-    echo -e "  --ensure                Autopilot: fix all missing dependencies"
+    echo -e "${BOLD}Pro Bundle Features:${NC}"
+    echo -e "  --create-server [type]  Install ${GREEN}FULL${NC} server suite (legacy/omp)"
+    echo -e "    * Legacy: Pre-installed Streamer, MySQL, sscanf"
+    echo -e "    * OMP: Clean structure + open.mp components"
     echo ""
     echo -e "${BOLD}Commands:${NC}"
-    echo -e "  --init <type>           Setup project (legacy/omp)"
-    echo -e "  --watch                 Live recompile on save"
+    echo -e "  --run                   Start server with PRO runner"
+    echo -e "  --log                   Live server log viewer"
+    echo -e "  --plugin <name>         Install .inc + .so binaries"
+    echo -e "  --ensure                Autopilot system (Self-Healing)"
     echo ""
 }
 
-function install_server_binaries() {
+function project_init() {
     local TYPE=$1
-    echo -e "${BLUE}[God Mode]${NC} Installing ${CYAN}${TYPE}${NC} server binaries..."
-    
+    echo -e "${BLUE}[fpawn]${NC} Initializing ${CYAN}${TYPE}${NC} project structure..."
     if [ "$TYPE" = "omp" ]; then
-        echo -e "${YELLOW}[Info]${NC} Downloading latest open.mp Linux Server from GitHub..."
-        # We'll use the latest known working direct link from the GitHub releases page provided
-        curl -L -f -o omp_server.tar.gz "https://github.com/openmultiplayer/open.mp/releases/download/v1.1.0.2612/open.mp-linux-x86.tar.gz"
-        if [ $? -ne 0 ]; then echo -e "${RED}[Error]${NC} Download failed."; return 1; fi
-        
-        tar -xzf omp_server.tar.gz
-        mv open.mp omp-server 2>/dev/null || true
-        chmod +x omp-server
-        rm omp_server.tar.gz
-        echo -e "${GREEN}[Success]${NC} open.mp server binary installed."
+        mkdir -p src include dependencies scriptfiles/logs
+        [ ! -f "pawn.json" ] && echo -e "{\n  \"dependencies\": {},\n  \"compiler\": {\n    \"version\": \"3.10.11\"\n  }\n}" > pawn.json
+        [ ! -f "src/main.pwn" ] && echo -e "#include <open.mp>\n\nmain() {\n    print(\"Hello FerzDevZ open.mp!\");\n}" > src/main.pwn
     else
-        echo -e "${YELLOW}[Info]${NC} Downloading SA-MP Legacy Linux Server from sa-mp.co.id..."
-        # Using the specific SAMP Indonesia community mirror
-        curl -L -f -o samp_server.tar.gz "https://sa-mp.co.id/files/samp037svr_R2-1.tar.gz"
-        
-        if [ $? -ne 0 ]; then
-            echo -e "${YELLOW}[Warning]${NC} sa-mp.co.id failed. Trying official mirror..."
-            curl -L -f -o samp_server.tar.gz "http://files.sa-mp.com/samp037svr_R2-1.tar.gz"
-        fi
-        
-        if [ ! -f "samp_server.tar.gz" ] || [ ! -s "samp_server.tar.gz" ]; then
-            echo -e "${RED}[Error]${NC} Failed to download SAMP server. Please check your internet."
-            return 1
-        fi
-
-        tar -xzf samp_server.tar.gz
-        # Logic to handle different tarball structures
-        if [ -d "samp03" ]; then mv samp03/* ./; rmdir samp03
-        elif [ -d "samp03svr" ]; then mv samp03svr/* ./; rmdir samp03svr; fi
-        
-        [ -f "samp03svr" ] && chmod +x samp03svr
-        [ -f "samp-npc" ] && chmod +x samp-npc
-        [ -f "announce" ] && chmod +x announce
-        rm -f samp_server.tar.gz
-        echo -e "${GREEN}[Success]${NC} SA-MP Legacy server binaries installed from community source."
+        mkdir -p gamemodes filterscripts pawno/include scriptfiles/logs plugins
+        [ ! -f "server.cfg" ] && echo -e "echo Running Legacy SAMP Server...\nannounce 1\nquery 1" > server.cfg
+        [ ! -f "gamemodes/main.pwn" ] && echo -e "#include <a_samp>\n\nmain() {\n    print(\"Hello FerzDevZ Legacy!\");\n}" > gamemodes/main.pwn
     fi
 }
 
 function plugin_manager() {
     local NAME=$1
-    echo -e "${BLUE}[FPM]${NC} Setting up ${CYAN}$NAME${NC} (.inc + .so)..."
-    mkdir -p include plugins
+    local SILENT=$2
+    [ "$SILENT" != "true" ] && echo -e "${BLUE}[FPM]${NC} Setting up ${CYAN}$NAME${NC} (Full Library)..."
+    
+    local TARGET_INC="include"
+    [ -d "pawno/include" ] && TARGET_INC="pawno/include"
+    mkdir -p "$TARGET_INC" plugins
     
     case $NAME in
         streamer)
-            curl -L -s -o "include/streamer.inc" "https://raw.githubusercontent.com/samp-incognito/samp-streamer-plugin/master/include/streamer.inc"
+            curl -L -s -o "$TARGET_INC/streamer.inc" "https://raw.githubusercontent.com/samp-incognito/samp-streamer-plugin/master/include/streamer.inc"
             curl -L -s -o "plugins/streamer.so" "https://github.com/samp-incognito/samp-streamer-plugin/releases/download/v2.9.6/streamer.so"
             ;;
         mysql)
-            curl -L -s -o "include/a_mysql.inc" "https://raw.githubusercontent.com/pBlueG/SA-MP-MySQL/master/a_mysql.inc"
+            curl -L -s -o "$TARGET_INC/a_mysql.inc" "https://raw.githubusercontent.com/pBlueG/SA-MP-MySQL/master/a_mysql.inc"
             curl -L -s -o "plugins/mysql.so" "https://github.com/pBlueG/SA-MP-MySQL/releases/download/R41-4/mysql.so"
             ;;
         sscanf)
-            curl -L -s -o "include/sscanf2.inc" "https://raw.githubusercontent.com/Y-Less/sscanf/master/sscanf2.inc"
+            curl -L -s -o "$TARGET_INC/sscanf2.inc" "https://raw.githubusercontent.com/Y-Less/sscanf/master/sscanf2.inc"
             curl -L -s -o "plugins/sscanf.so" "https://github.com/Y-Less/sscanf/releases/download/v2.11.4/sscanf.so"
             ;;
-        *)
-            echo -e "${RED}[Error]${NC} Automated .so download not yet mapped for $NAME. Manual install suggested."
-            return 1 ;;
+        *) 
+            [ "$SILENT" != "true" ] && echo -e "${RED}[Error]${NC} Plugin $NAME binaries not found."; return 1 ;;
     esac
 
-    # Auto-add to server.cfg if detected
     if [ -f "server.cfg" ]; then
-        if ! grep -q "plugins $NAME" server.cfg; then
-            if grep -q "^plugins" server.cfg; then
-                sed -i "s/^plugins /& $NAME /" server.cfg
-            else
-                echo "plugins $NAME" >> server.cfg
-            fi
-            echo -e "${YELLOW}[cfg]${NC} Added $NAME to server.cfg"
+        if ! grep -q "plugins.*$NAME" server.cfg; then
+            if grep -q "^plugins" server.cfg; then sed -i "s/^plugins /& $NAME.so /" server.cfg
+            else echo "plugins $NAME.so" >> server.cfg; fi
         fi
     fi
-    echo -e "${GREEN}[Success]${NC} Plugin $NAME is ready for Linux."
+}
+
+function install_server_binaries() {
+    local TYPE=$1
+    echo -e "${BLUE}[God Mode]${NC} Deploying ${CYAN}${TYPE^} Professional Bundle${NC}..."
+    
+    if [ "$TYPE" = "omp" ]; then
+        curl -L -f -o omp_server.tar.gz "https://github.com/openmultiplayer/open.mp/releases/download/v1.1.0.2612/open.mp-linux-x86.tar.gz"
+        if [ $? -ne 0 ]; then echo -e "${RED}[Error]${NC} Download failed."; return 1; fi
+        
+        tar -xzf omp_server.tar.gz
+        if [ -d "Server" ]; then mv Server/* ./; rm -rf Server; fi
+        
+        chmod +x omp-server
+        project_init "omp"
+        rm -f omp_server.tar.gz
+        echo -e "${GREEN}[Success]${NC} open.mp Professional Suite ready."
+    else
+        echo -e "${YELLOW}[Info]${NC} Downloading SA-MP binaries from community source..."
+        curl -L -f -o samp_server.tar.gz "https://sa-mp.co.id/files/samp037svr_R2-1.tar.gz"
+        if [ $? -ne 0 ]; then curl -L -f -o samp_server.tar.gz "http://files.sa-mp.com/samp037svr_R2-1.tar.gz"; fi
+        
+        if [ ! -f "samp_server.tar.gz" ]; then echo -e "${RED}[Error]${NC} Download failed."; return 1; fi
+
+        tar -xzf samp_server.tar.gz
+        if [ -d "samp03" ]; then mv samp03/* ./; rmdir samp03; fi
+        
+        [ -f "samp03svr" ] && chmod +x samp03svr
+        [ -f "samp-npc" ] && chmod +x samp-npc
+        [ -f "announce" ] && chmod +x announce
+        
+        # PRO BUNDLE: Pre-install plugins
+        echo -e "${BLUE}[God Mode]${NC} Pre-installing Professional Plugins (Streamer, MySQL, sscanf)..."
+        plugin_manager "streamer" "true"
+        plugin_manager "mysql" "true"
+        plugin_manager "sscanf" "true"
+        
+        project_init "legacy"
+        rm -f samp_server.tar.gz
+        echo -e "${GREEN}[Success]${NC} SA-MP Legacy Professional Suite ready."
+    fi
 }
 
 function server_runner() {
-    echo -e "${BLUE}[God Mode]${NC} Launching ${CYAN}FerzDevZ${NC} Server Runner..."
-    
+    echo -e "${BLUE}[God Mode]${NC} Starting Professional ${CYAN}FerzDevZ${NC} Server..."
     local BIN=""
-    if [ -f "./omp-server" ]; then BIN="./omp-server"
-    elif [ -f "./samp03svr" ]; then BIN="./samp03svr"
-    else
-        echo -e "${RED}[Error]${NC} Server binary not found. Use --create-server first."
-        return 1
-    fi
-
-    # Set library path for plugins
+    [ -f "./omp-server" ] && BIN="./omp-server"
+    [ -f "./samp03svr" ] && BIN="./samp03svr"
+    
+    if [ -z "$BIN" ]; then echo -e "${RED}[Error]${NC} No server binary found."; return 1; fi
+    
     export LD_LIBRARY_PATH=".:$LD_LIBRARY_PATH"
     chmod +x "$BIN"
-    
-    echo -e "${MAGENTA}[Log]${NC} Piping server output through color filter..."
     "$BIN" 2>&1 | sed -u \
-        -e "s/\[info\].*/${GREEN}&${NC}/i" \
-        -e "s/\[warning\].*/${YELLOW}&${NC}/i" \
-        -e "s/\[error\].*/${RED}&${NC}/i" \
-        -e "s/\[debug\].*/${CYAN}&${NC}/i"
+        -e "s/error.*/${RED}&${NC}/i" \
+        -e "s/warning.*/${YELLOW}&${NC}/i" \
+        -e "s/info.*/${GREEN}&${NC}/i" \
+        -e "s/Starting.*/${MAGENTA}${BOLD}&${NC}/"
 }
 
 # --- SMART SENSING & AUTOPILOT ---
@@ -158,68 +159,50 @@ function smart_finder() {
     local SEARCH_URL="https://api.github.com/search/code?q=filename:$INC_NAME+extension:inc"
     local RESPONSE=$(curl -s "$SEARCH_URL")
     local DOWNLOAD_URL=$(echo "$RESPONSE" | jq -r '.items[0].html_url' | sed 's/github.com/raw.githubusercontent.com/' | sed 's/\/blob\//\//')
-    
     if [ "$DOWNLOAD_URL" != "null" ] && [ -n "$DOWNLOAD_URL" ]; then
-        echo -e "${GREEN}[Found]${NC} Downloading: $INC_NAME"
         local TARGET_DIR="include"
         [ -d "pawno/include" ] && TARGET_DIR="pawno/include"
         mkdir -p "$TARGET_DIR"
-        curl -L -s -o "$TARGET_DIR/$INC_NAME" "$DOWNLOAD_URL"
-        return 0
+        curl -L -s -o "$TARGET_DIR/$INC_NAME" "$DOWNLOAD_URL" && return 0
     fi
     return 1
 }
 
 function execute_compiler() {
-    local ENGINE=$1
-    local PROFILE=$2
-    shift 2
-    local ARGS=("$@")
-    local OUT_FILE="/tmp/fpawn_out.log"
+    local ENGINE=$1; local PROFILE=$2; shift 2; local ARGS=("$@")
+    local OUT_FILE="/tmp/fpawn_out.log"; local INC_FLAGS=()
     
-    local INCLUDE_FLAGS=()
     if [ "$PROFILE" = "omp" ]; then
-        [ -d "include" ] && INCLUDE_FLAGS+=("-iinclude")
-        [ -d "dependencies" ] && INCLUDE_FLAGS+=("-idependencies")
+        [ -d "include" ] && INC_FLAGS+=("-iinclude")
+        [ -d "dependencies" ] && INC_FLAGS+=("-idependencies")
     else
-        [ -d "pawno/include" ] && INCLUDE_FLAGS+=("-ipawno/include")
-        [ -d "include" ] && INCLUDE_FLAGS+=("-iinclude")
+        [ -d "pawno/include" ] && INC_FLAGS+=("-ipawno/include")
+        [ -d "include" ] && INC_FLAGS+=("-iinclude")
     fi
-    INCLUDE_FLAGS+=("-i$GLOBAL_INC")
+    INC_FLAGS+=("-i$GLOBAL_INC")
 
     if [ "$ENGINE" = "qawno" ]; then
-        chmod +x "$QAWNO_DIR/pawncc"
-        export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
-        "$QAWNO_DIR/pawncc" "${ARGS[@]}" "${INCLUDE_FLAGS[@]}" "-i$QAWNO_DIR/include" "-;+" > "$OUT_FILE" 2>&1
+        chmod +x "$QAWNO_DIR/pawncc"; export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
+        "$QAWNO_DIR/pawncc" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$QAWNO_DIR/include" "-;+" > "$OUT_FILE" 2>&1
     else
-        wine "$PAWNO_DIR/pawncc.exe" "${ARGS[@]}" "${INCLUDE_FLAGS[@]}" "-i$PAWNO_DIR/include" > "$OUT_FILE" 2>&1
+        wine "$PAWNO_DIR/pawncc.exe" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$PAWNO_DIR/include" > "$OUT_FILE" 2>&1
     fi
     local STATUS=$?
 
     if grep -q "fatal error 100: cannot read from file: \"" "$OUT_FILE"; then
         local MISSING=$(grep "fatal error 100: cannot read from file: \"" "$OUT_FILE" | head -n 1 | sed 's/.*: "\(.*\)".*/\1/')
-        if [ $RETRY_COUNT -lt $RETRY_LIMIT ]; then
-            echo -e "${YELLOW}[Self-Healing]${NC} Missing ${BOLD}$MISSING.inc${NC}. Repairing..."
-            if smart_finder "$MISSING.inc"; then
-                ((RETRY_COUNT++)); execute_compiler "$ENGINE" "$PROFILE" "${ARGS[@]}"
-                return $?
-            fi
+        if [ $RETRY_COUNT -lt $RETRY_LIMIT ] && smart_finder "$MISSING.inc"; then
+            ((RETRY_COUNT++)); execute_compiler "$ENGINE" "$PROFILE" "${ARGS[@]}"; return $?
         fi
     fi
-
-    # Color filter for compiler output
-    cat "$OUT_FILE" | sed -u \
-    -e "s/error \([0-9]\{3\}\)/\x1b[1;31merror \1\x1b[0m/g" \
-    -e "s/warning \([0-9]\{3\}\)/\x1b[1;33mwarning \1\x1b[0m/g" \
-    -e "s/(\([0-9]\{1,\}\))/\x1b[1;36m(\1)\x1b[0m/g"
-    
+    cat "$OUT_FILE" | sed -u -e "s/error \([0-9]\{3\}\)/\x1b[1;31merror \1\x1b[0m/g" \
+    -e "s/warning \([0-9]\{3\}\)/\x1b[1;33mwarning \1\x1b[0m/g" -e "s/(\([0-9]\{1,\}\))/\x1b[1;36m(\1)\x1b[0m/g"
     return $STATUS
 }
 
 # --- MAIN LOGIC ---
 
 if [ $# -eq 0 ]; then show_help; exit 1; fi
-
 ENGINE="auto"; PROFILE="auto"; TARGET_FILE=""; PASSED_ARGS=(); WATCH=false
 
 while [[ $# -gt 0 ]]; do
@@ -229,10 +212,7 @@ while [[ $# -gt 0 ]]; do
         --create-server) install_server_binaries "$2"; exit 0 ;;
         --run) server_runner; exit 0 ;;
         --log) tail -f server_log.txt 2>/dev/null || tail -f logs/server.log; exit 0 ;;
-        --update) 
-            mkdir -p "$GLOBAL_INC"
-            curl -L -s -o "$GLOBAL_INC/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
-            echo -e "${GREEN}[Update]${NC} Global library updated."; exit 0 ;;
+        --update) curl -L -s -o "$GLOBAL_INC/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"; exit 0 ;;
         --plugin) plugin_manager "$2"; shift 2; exit 0 ;;
         --watch) WATCH=true; shift ;;
         --omp) ENGINE="qawno"; PROFILE="omp"; shift ;;
@@ -244,8 +224,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Detection
-CWD=$(pwd)
 if [ "$PROFILE" = "auto" ]; then
     if [ -f "pawn.json" ] || [ -d "dependencies" ]; then PROFILE="omp"
     elif [ -f "server.cfg" ] || [ -d "pawno/include" ]; then PROFILE="legacy"; fi
@@ -254,19 +232,16 @@ if [ "$ENGINE" = "auto" ] && [ -f "$TARGET_FILE" ]; then
     if grep -q "#include <open.mp>" "$TARGET_FILE"; then ENGINE="qawno"; PROFILE="omp"
     elif grep -q "#include <a_samp>" "$TARGET_FILE"; then ENGINE="pawno"; [ "$PROFILE" = "auto" ] && PROFILE="legacy"; fi
 fi
-[ "$PROFILE" = "auto" ] && PROFILE="omp"
-[ "$ENGINE" = "auto" ] && ENGINE="qawno"
+[ "$PROFILE" = "auto" ] && PROFILE="omp"; [ "$ENGINE" = "auto" ] && ENGINE="qawno"
 
-# EXECUTION
 if [ "$WATCH" = true ]; then
-    echo -e "${MAGENTA}[Watch]${NC} Monitoring changes..."
     while inotifywait -e modify "$TARGET_FILE" 2>/dev/null; do
         clear; RETRY_COUNT=0; execute_compiler "$ENGINE" "$PROFILE" "${PASSED_ARGS[@]}"
     done
 else
-    echo -e "${BLUE}[fpawn God Mode]${NC} Initiating ${CYAN}FerzDevZ${NC} Flight..."
+    echo -e "${BLUE}[fpawn Pro]${NC} Initiating ${CYAN}FerzDevZ${NC} Suite..."
     execute_compiler "$ENGINE" "$PROFILE" "${PASSED_ARGS[@]}"
     STATUS=$?
-    [ $STATUS -eq 0 ] && echo -e "${GREEN}[OK]${NC} Compilation successful." || echo -e "${RED}[ERR]${NC} Compilation failed."
+    [ $STATUS -eq 0 ] && echo -e "${GREEN}[OK]${NC} Mission accomplished." || echo -e "${RED}[ERR]${NC} System failure."
     exit $STATUS
 fi

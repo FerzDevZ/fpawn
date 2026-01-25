@@ -1,27 +1,37 @@
-# fpawn v9.1 - FerzDevZ God Mode (Stable)
+# fpawn v9.5 - FerzDevZ Professional Bundle Pack
 
-Level **GOD MODE** kini lebih stabil. Versi 9.1 memperbaiki bug pada sistem instalasi server dan memberikan feedback error yang lebih jelas.
+`fpawn` sekarang menyediakan paket instalasi server yang **"Ready-to-Code"**. Tidak ada lagi server kosong yang membosankan.
 
-## Fitur Unggulan v9.1
+## Apa itu Professional Bundle?
 
-### 1. Robust Server Installer (`--create-server`)
-Sistem instalasi server telah diperbaiki untuk menangani kegagalan download dan struktur folder yang berbeda-beda:
+Saat Anda menjalankan `--create-server`, `fpawn` tidak hanya mendownload engine, tapi juga menyiapkan seluruh ekosistem developer profesional:
+
+### 1. SA-MP Legacy Pro Bundle
+- **Pre-installed Plugins**: Otomatis memasang **Streamer**, **MySQL**, dan **sscanf** (Include + Linux .so).
+- **Auto-Config**: `server.cfg` sudah dikonfigurasi dengan plugin-plugin tersebut.
+- **Classic Structure**: Folder `gamemodes`, `filterscripts`, dan `scriptfiles` siap pakai.
+
+### 2. open.mp Pro Bundle
+- **Clean Root**: Tidak ada folder double atau nested.
+- **Modern Structure**: Folder `src`, `include`, dan `dependencies` otomatis dibuat.
+- **Auto-Init**: File `pawn.json` dan template `main.pwn` sudah siap dikerjakan.
+
+## Cara Penggunaan Pro Bundle
+
+**Bangun Server Legacy Full-Plugin:**
 ```bash
-fpawn --create-server legacy   # Kini lebih stabil & ada error checking
-fpawn --create-server omp      # Standar open.mp terbaru
+fpawn --create-server legacy
 ```
 
-### 2. Full-Stack Plugin Manager
-Download `.inc` dan `.so` otomatis. `fpawn` akan memastikan library Anda lengkap sebelum server dijalankan.
-
-### 3. Smart Integrated Runner
-Jalankan server dengan monitoring warna-warni:
+**Bangun Server open.mp Modern:**
 ```bash
-fpawn --run
+fpawn --create-server omp
 ```
 
-## Troubleshooting:
-Jika instalasi server gagal, periksa koneksi internet Anda atau coba jalankan ulang. `fpawn` sekarang akan memberitahu Anda secara detail di mana letak kegagalannya, bukan sekadar memberikan pesan sukses palsu.
+## Keunggulan v9.5:
+- **Zero Conflict**: Struktur folder dipisahkan dengan sangat rapi sesuai standar masing-masing engine.
+- **Plugin Ready**: Anda bisa langsung menggunakan fungsi MySQL atau Streamer di gamemode Anda tanpa download tambahan.
+- **Auto-Chmod**: Semua binary server dan plugin otomatis diberikan izin eksekusi.
 
 ---
 **Powered by FerzDevZ**
