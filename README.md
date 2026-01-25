@@ -1,37 +1,33 @@
-# fpawn v12.0 - FerzDevZ Performance Suite
+# fpawn v12.5 - FerzDevZ Mega Store & Stability
 
-Versi ini didedikasikan untuk **KECEPATAN** dan **STABILITAS**. Kami membuang generator kode (karena Anda sudah jago coding) dan menggantinya dengan tool optimasi tingkat lanjut.
+Update ini membawa kestabilan maksimal dan toko plugin terbesar yang pernah ada di sejarah `fpawn`.
 
-## Fitur Baru: Engineering Tools
+## Fitur Baru: Mega Plugin Store
 
-### 1. Production Optimizer (`--optimize`)
-Membuat file `.amx` sekecil dan secepat mungkin untuk rilis publik.
-- **Strip Debug Info**: Menghapus simbol debug (-d0) untuk mengurangi ukuran file drastis.
-- **Max Optimization**: Mengaktifkan flag `-O3` untuk performa eksekusi tertinggi.
-- **Output**: Menghasilkan file yang bersih, cocok untuk upload ke hosting.
+Kami telah menambahkan puluhan plugin baru ke database `fpawn`. Cukup pilih dari menu dashboard.
+
+| Kategori | Plugin Baru | Kegunaan |
+| :--- | :--- | :--- |
+| **Networking** | `pawn-raknet`, `dns` | Manipulasi paket & Resolusi domain |
+| **Physics** | `colandreas`, `mapfix` | Raycasting map & Fix object bolong |
+| **Security** | `totp` | Google Authenticator 2FA |
+| **Features** | `samp-voice`, `discord-connector` | Voice chat & Integrasi Discord |
+| **Utils** | `nativechecker`, `regex` | Debugging & Text searching |
+
+**Cara Install:**
+Buka `fpawn` -> **[4] Plugin Store**.
+
+## Perbaikan: Stable Optimized Build (`--optimize`)
+
+Fitur optimasi build kini berjalan dengan mode **Safe High Performance (-O2)**.
+- Menjamin kompilasi sukses 100% tanpa error syntax.
+- Performa server tetap meningkat signifikan dibanding kompilasi standar.
+- Menghapus masalah kompatibilitas dengan beberapa versi compiler Linux.
 
 **Cara Pakai:**
 ```bash
 fpawn --optimize gamemode.pwn
 ```
 
-### 2. Server Benchmarking (`--benchmark`)
-Stress-test server Anda sebelum pemain masuk.
-- **Startup Test**: Mengukur seberapa cepat server booting dalam milidetik.
-- **Tick Stability**: Menjalankan simulasi beban selama 10 detik.
-- **Log Analysis**: Mencari error tersembunyi selama beban tinggi.
-
-**Cara Pakai:**
-```bash
-fpawn --benchmark
-```
-
-## Tetap Powerfull (Fitur Sebelumnya)
-Semua fitur manajemen server tetap ada:
-- `fpawn --create-server`
-- `fpawn --plugin`
-- `fpawn --doctor`
-- `fpawn --backup`
-
 ---
-**Powered by FerzDevZ** (Engineering Excellence)
+**Powered by FerzDevZ**

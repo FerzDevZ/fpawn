@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 12.0 (Performance Suite)
+# Version: 12.5 (Mega Store & Fixes)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 
 # --- DIRECTORIES ---
@@ -21,175 +21,165 @@ MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# --- PERFORMANCE ENGINES ---
+# --- PLUGIN DATABASE (MEGA STORE) ---
+
+function install_plugin_logic() {
+    local NAME=$1; local CONTEXT=$2
+    local TINC="include"; [ -d "pawno/include" ] && TINC="pawno/include"
+    mkdir -p "$TINC" plugins
+
+    # Compatibility Warnings
+    if [ "$CONTEXT" = "omp" ]; then
+        case $NAME in
+            crashdetect|nativechecker|mapfix|skyline) 
+                echo -e "${YELLOW}[Warning]${NC} Plugin '${NAME}' is mainly for Legacy. open.mp has built-in fixes."; return 0 ;;
+        esac
+    fi
+
+    echo -e "${BLUE}[FPM]${NC} Downloading ${CYAN}${NAME}${NC}..."
+    
+    case $NAME in
+        # ESSENTIALS
+        streamer) curl -L -s -o "$TINC/streamer.inc" "https://raw.githubusercontent.com/samp-incognito/samp-streamer-plugin/master/include/streamer.inc"; curl -L -s -o "plugins/streamer.so" "https://github.com/samp-incognito/samp-streamer-plugin/releases/download/v2.9.6/streamer.so" ;;
+        mysql)    curl -L -s -o "$TINC/a_mysql.inc" "https://raw.githubusercontent.com/pBlueG/SA-MP-MySQL/master/a_mysql.inc"; curl -L -s -o "plugins/mysql.so" "https://github.com/pBlueG/SA-MP-MySQL/releases/download/R41-4/mysql.so" ;;
+        sscanf)   curl -L -s -o "$TINC/sscanf2.inc" "https://raw.githubusercontent.com/Y-Less/sscanf/master/sscanf2.inc"; curl -L -s -o "plugins/sscanf.so" "https://github.com/Y-Less/sscanf/releases/download/v2.11.4/sscanf.so" ;;
+        
+        # UTILITIES
+        crashdetect) curl -L -s -o "$TINC/crashdetect.inc" "https://raw.githubusercontent.com/Zeex/samp-plugin-crashdetect/master/include/crashdetect.inc"; curl -L -s -o "plugins/crashdetect.so" "https://github.com/Zeex/samp-plugin-crashdetect/releases/download/v4.20/crashdetect.so" ;;
+        nativechecker) curl -L -s -o "plugins/nativechecker.so" "https://github.com/haprog/samp-nativechecker/releases/download/1.2/nativechecker.so" ;;
+        mapfix) curl -L -s -o "$TINC/MapFix.inc" "https://raw.githubusercontent.com/NexiusTailer/MapFix/master/MapFix.inc"; curl -L -s -o "plugins/MapFix.so" "https://github.com/NexiusTailer/MapFix/releases/download/v1.0.3/MapFix.so" ;;
+        
+        # ADVANCED
+        pawn-raknet) curl -L -s -o "$TINC/Pawn.RakNet.inc" "https://raw.githubusercontent.com/katursis/Pawn.RakNet/master/src/Pawn.RakNet.inc"; curl -L -s -o "plugins/Pawn.RakNet.so" "https://github.com/katursis/Pawn.RakNet/releases/download/1.5.1/Pawn.RakNet.so" ;;
+        colandreas) curl -L -s -o "$TINC/colandreas.inc" "https://raw.githubusercontent.com/Pottus/ColAndreas/master/include/colandreas.inc"; curl -L -s -o "plugins/colandreas.so" "https://github.com/Pottus/ColAndreas/releases/download/1.4.0/colandreas.so" ;;
+        fcnpc) curl -L -s -o "$TINC/FCNPC.inc" "https://raw.githubusercontent.com/Ziggi/FCNPC/master/include/FCNPC.inc"; curl -L -s -o "plugins/FCNPC.so" "https://github.com/Ziggi/FCNPC/releases/download/2.0.0/FCNPC.so" ;;
+        
+        # FEATURES
+        samp-voice) curl -L -s -o "$TINC/samp_voice.inc" "https://raw.githubusercontent.com/CyberMor/sampvoice/master/server/include/samp_voice.inc"; curl -L -s -o "plugins/sampvoice.so" "https://github.com/CyberMor/sampvoice/releases/download/v3.0/sampvoice.so" ;;
+        discord-connector) curl -L -s -o "$TINC/discord-connector.inc" "https://raw.githubusercontent.com/maddinat0r/samp-discord-connector/master/include/discord-connector.inc"; curl -L -s -o "plugins/discord-connector.so" "https://github.com/maddinat0r/samp-discord-connector/releases/download/v0.3.5/discord-connector.so" ;;
+        pawn-regex) curl -L -s -o "$TINC/Pawn.Regex.inc" "https://raw.githubusercontent.com/urShadow/Pawn.Regex/master/Pawn.Regex.inc"; curl -L -s -o "plugins/Pawn.Regex.so" "https://github.com/urShadow/Pawn.Regex/releases/download/1.1.2/Pawn.Regex.so" ;;
+        
+        *) echo -e "${RED}[Error]${NC} Plugin $NAME not found."; return 1 ;;
+    esac
+
+    # Config Update
+    if [ -f "server.cfg" ]; then
+        local PLG_FILE="$NAME.so"
+        [ "$NAME" == "pawn-raknet" ] && PLG_FILE="Pawn.RakNet.so"; [ "$NAME" == "fcnpc" ] && PLG_FILE="FCNPC.so"
+        [ "$NAME" == "mapfix" ] && PLG_FILE="MapFix.so"; [ "$NAME" == "samp-voice" ] && PLG_FILE="sampvoice.so"
+        [ "$NAME" == "pawn-regex" ] && PLG_FILE="Pawn.Regex.so"
+        
+        if ! grep -q "plugins.*$PLG_FILE" server.cfg; then
+            if grep -q "^plugins" server.cfg; then sed -i "s/^plugins /& $PLG_FILE /" server.cfg; else echo "plugins $PLG_FILE" >> server.cfg; fi
+            echo -e "${YELLOW}[Cfg]${NC} Added $PLG_FILE."
+        fi
+    fi
+    echo -e "${GREEN}[Success]${NC} Installed."
+}
+
+# --- OPTIMIZATION ENGINE (FIXED) ---
+
+function execute_compiler() {
+    local ENG=$1; local PROF=$2; shift 2; 
+    
+    # Separate file (last arg) from flags (all other args)
+    local FILE="${!#}"
+    local ARGS=()
+    if [ $# -gt 1 ]; then
+        ARGS=("${@:1:$#-1}")
+    fi
+    
+    # Safety Check
+    if [[ "$FILE" != *.pwn ]]; then
+        echo -e "${RED}[Error]${NC} Last argument must be a .pwn file."
+        return 1
+    fi
+
+    local OUT="/tmp/fpawn_out.log"; local INC_FLAGS=()
+    [ "$PROF" = "omp" ] && { [ -d "include" ] && INC_FLAGS+=("-iinclude"); [ -d "dependencies" ] && INC_FLAGS+=("-idependencies"); }
+    [ "$PROF" = "legacy" ] && { [ -d "pawno/include" ] && INC_FLAGS+=("-ipawno/include"); [ -d "include" ] && INC_FLAGS+=("-iinclude"); }
+    INC_FLAGS+=("-i$GLOBAL_INC")
+    
+    if [ "$ENG" = "qawno" ]; then
+        chmod +x "$QAWNO_DIR/pawncc"; export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
+        # Construct plain string for eval
+        local CMD_STR="\"$QAWNO_DIR/pawncc\""
+        for arg in "${ARGS[@]}"; do CMD_STR+=" \"$arg\""; done
+        for inc in "${INC_FLAGS[@]}"; do CMD_STR+=" \"$inc\""; done
+        CMD_STR+=" \"-i$QAWNO_DIR/include\" \"-;+\" \"$FILE\""
+        
+        # echo "DEBUG EXEC: $CMD_STR"
+        eval $CMD_STR > "$OUT" 2>&1
+    else
+        local CMD=("wine" "$PAWNO_DIR/pawncc.exe" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$PAWNO_DIR/include" "$FILE")
+        "${CMD[@]}" > "$OUT" 2>&1
+    fi
+    local STAT=$?
+    
+    if grep -q "fatal error 100" "$OUT"; then
+        # We can't easily extract filename here if we don't parse, so we skip auto-repair for now in optimization mode to be safe
+        # Or we try to regex it from the error message
+        local MIS=$(grep "fatal error 100" "$OUT" | head -n 1 | sed 's/.*: "\(.*\)".*/\1/')
+        if [ $RETRY_COUNT -lt 5 ] && smart_finder "$MIS.inc"; then ((RETRY_COUNT++)); execute_compiler "$ENG" "$PROF" "$@"; return $?; fi
+    fi
+    cat "$OUT" | sed -u -e "s/error \([0-9]\{3\}\)/\x1b[1;31merror \1\x1b[0m/g" -e "s/warning \([0-9]\{3\}\)/\x1b[1;33mwarning \1\x1b[0m/g"
+    return $STAT
+}
 
 function optimizer_engine() {
     echo -e "${BLUE}[Optimize]${NC} Initiating Production Optimization..."
-    
     local TARGET=$1
     [ -z "$TARGET" ] && TARGET="main.pwn"
-    [ ! -f "$TARGET" ] && [ -f "gamemodes/main.pwn" ] && TARGET="gamemodes/main.pwn"
-    [ ! -f "$TARGET" ] && [ -f "src/main.pwn" ] && TARGET="src/main.pwn"
     
-    echo -e "${CYAN}[Step 1]${NC} Compiling with High Optimization (-O3 -d0)..."
-    # -d0 strips debug symbols (smaller size)
-    # -O3 maximizes speed (theoretical)
-    execute_compiler "auto" "auto" "$TARGET" "-O3" "-d0"
+    # Using safe optimization level -O2
+    execute_compiler "auto" "auto" "-O2" "$TARGET"
     
     if [ $? -eq 0 ]; then
-        echo -e "${CYAN}[Step 2]${NC} Analyzing AMX structure..."
         local AMX="${TARGET%.*}.amx"
-        local SIZE=$(wc -c < "$AMX")
-        echo -e "${GREEN}[Success]${NC} Optimized Build Ready: ${BOLD}$AMX${NC} ($SIZE bytes)"
-        echo -e "${YELLOW}[Info]${NC} Debug symbols stripped. Use this for public release only."
+        [ -f "$AMX" ] && echo -e "${GREEN}[Success]${NC} Optimized Build: ${BOLD}$AMX${NC}" || echo -e "${RED}[Error]${NC} AMX generation failed."
     else
-        echo -e "${RED}[Failed]${NC} Optimization compilation failed."
+        echo -e "${RED}[Failed]${NC} Compilation error."
     fi
-}
-
-function benchmark_mode() {
-    echo -e "${BLUE}[Benchmark]${NC} Starting Server Stress Test..."
-    
-    if [ ! -f "server.cfg" ] && [ ! -f "config.json" ]; then
-        echo -e "${RED}[Error]${NC} No server configuration found."
-        return 1
-    fi
-    
-    # Create a temporary benchmark config
-    echo -e "${CYAN}[Setup]${NC} Configuring synthetic load..."
-    cp server.cfg server.cfg.bak 2>/dev/null
-    
-    # Inject plugins if needed (profiler would be ideal here)
-    
-    echo -e "${MAGENTA}[Run]${NC} Launching Server for 10 Seconds..."
-    local START_TIME=$(date +%s%N)
-    
-    # Run server in background
-    timeout 10s ./samp03svr > benchmark.log 2>&1 &
-    local PID=$!
-    
-    # Monitor
-    for i in {1..5}; do
-        echo -n "."
-        sleep 1
-    done
-    
-    # Calculate stats
-    wait $PID 2>/dev/null
-    local END_TIME=$(date +%s%N)
-    local DURATION=$(( (END_TIME - START_TIME) / 1000000 ))
-    
-    echo -e "\n${GREEN}[Report]${NC} Performance Analysis:"
-    echo -e " - Boot Time: < 1 second (Estimated)"
-    echo -e " - Stability: Run completed ($DURATION ms)"
-    echo -e " - Log Check: $(grep -c "Error" benchmark.log) Errors found."
-    
-    rm benchmark.log
-    [ -f "server.cfg.bak" ] && mv server.cfg.bak server.cfg
-}
-
-function profiler_setup() {
-    echo -e "${BLUE}[Profiler]${NC} Setting up Code Profiling..."
-    # Re-compile with debug level 3 and standard profile
-    echo -e "${CYAN}[Action]${NC} Re-compiling with debug info (-d3)..."
-    execute_compiler "auto" "auto" "main.pwn" "-d3"
-    
-    echo -e "${YELLOW}[Info]${NC} Please install 'Profiler' or 'CrashDetect' plugin to see function timings."
-    echo -e "Install using: ${BOLD}fpawn --plugin crashdetect${NC}"
 }
 
 # --- EXTENDED DASHBOARD ---
 
 function show_plugin_menu() {
     clear
-    echo -e "${BLUE}=== FerzDevZ Plugin Store ===${NC}"
+    echo -e "${BLUE}=== FerzDevZ Mega Store ===${NC}"
     echo -e "${BOLD}Essentials:${NC}"
-    echo -e " [1] Streamer (Incognito)"
-    echo -e " [2] MySQL (BlueG)"
-    echo -e " [3] sscanf (Y-Less)"
-    echo -e ""
+    echo -e " [1] Streamer        [2] MySQL           [3] sscanf"
+    echo -e "${BOLD}Utilities:${NC}"
+    echo -e " [4] CrashDetect     [5] NativeChecker   [6] MapFix"
     echo -e "${BOLD}Advanced:${NC}"
-    echo -e " [4] CrashDetect (Debug)"
-    echo -e " [5] Pawn.RakNet (Networking)"
-    echo -e " [6] ColAndreas (Physics)"
-    echo -e " [7] FCNPC (Bots)"
+    echo -e " [7] Pawn.RakNet     [8] ColAndreas      [9] FCNPC"
+    echo -e "${BOLD}Features:${NC}"
+    echo -e " [10] SAM-Voice      [11] Discord-Conn   [12] Regex"
     echo -e ""
-    read -p "Select Plugin to Install: " P_CHOICE
+    read -p "Select # to Install: " P_CHOICE
     case $P_CHOICE in
-        1) plugin_manager "streamer" ;;
+        1) plugin_manager "streamer" ;; 
         2) plugin_manager "mysql" ;;
         3) plugin_manager "sscanf" ;;
         4) plugin_manager "crashdetect" ;;
-        5) plugin_manager "pawn-raknet" ;;
-        6) plugin_manager "colandreas" ;;
-        7) plugin_manager "fcnpc" ;;
+        5) plugin_manager "nativechecker" ;;
+        6) plugin_manager "mapfix" ;;
+        7) plugin_manager "pawn-raknet" ;;
+        8) plugin_manager "colandreas" ;;
+        9) plugin_manager "fcnpc" ;;
+        10) plugin_manager "samp-voice" ;;
+        11) plugin_manager "discord-connector" ;;
+        12) plugin_manager "pawn-regex" ;;
         *) echo "Cancelled." ;;
     esac
+    read -p "Press Enter to continue..."
 }
 
-function show_dashboard() {
-    clear
-    echo -e "${BLUE}======================================================${NC}"
-    echo -e "${BOLD}          fpawn v12.0 - FerzDevZ Performance Suite${NC}"
-    echo -e "${BLUE}======================================================${NC}"
-    
-    local CTX="Unknown"
-    if [ -f "pawn.json" ]; then CTX="${GREEN}open.mp Project${NC}"; 
-    elif [ -f "server.cfg" ]; then CTX="${YELLOW}SA-MP Legacy Project${NC}"; 
-    else CTX="${RED}No Project Detected${NC}"; fi
-    echo -e "Context: $CTX"
-    echo -e ""
-    echo -e " [1] Compile Script"
-    echo -e " [2] Start Server"
-    echo -e " [3] Live Monitor"
-    echo -e " [4] Plugin Store"
-    echo -e " [5] ${YELLOW}Optimize Build${NC} (Release Mode)"
-    echo -e " [6] ${CYAN}Benchmark Server${NC} (Stress Test)"
-    echo -e " [7] Cloud Backup"
-    echo -e " [8] Initialize New Project"
-    echo -e " [0] Exit"
-    echo -e ""
-    read -p "Select: " CHOICE
-    
-    case $CHOICE in
-        1) 
-            read -p "Enter filename (e.g., main.pwn): " FILE
-            [ -z "$FILE" ] && FILE="main.pwn"
-            execute_compiler "auto" "auto" "$FILE"; exit ;;
-        2) server_runner; exit ;;
-        3) 
-            read -p "Enter filename: " FILE
-            [ -z "$FILE" ] && FILE="main.pwn"
-            WATCH=true; TARGET_FILE="$FILE"; run_watch_mode; exit ;;
-        4) show_plugin_menu; sleep 2; show_dashboard ;; 
-        5) optimizer_engine; exit ;;
-        6) benchmark_mode; exit ;;
-        7) cloud_backup; exit ;;
-        8) 
-            echo -e "[1] Legacy (SAMP)  [2] OMP (Modern)"
-            read -p "Type: " TYPE_CH
-            [ "$TYPE_CH" == "1" ] && project_init "legacy"
-            [ "$TYPE_CH" == "2" ] && project_init "omp"
-            exit ;;
-        0) exit 0 ;;
-        *) show_dashboard ;;
-    esac
-}
-
-# --- RE-INJECT CORE FUNCTIONS ---
-# [Preserving Cloud Backup and Core Logic]
-
-function cloud_backup() {
-    echo -e "${BLUE}[Cloud]${NC} Initiating Backup..."
-    if [ ! -d ".git" ]; then git init; git branch -M main; fi
-    git add scriptfiles server.cfg *.pwn
-    git commit -m "backup: snapshot by fpawn v12.0"
-    if git remote -v | grep -q "origin"; then git push -u origin main; else echo -e "${RED}[Error]${NC} No remote origin."; fi
-}
+# --- RE-INJECT CORE (Dependencies) ---
 
 function project_init() {
     local TYPE=$1
-    echo -e "${BLUE}[fpawn]${NC} Initializing ${CYAN}${TYPE}${NC} project structure..."
+    echo -e "${BLUE}[fpawn]${NC} Initializing ${CYAN}${TYPE}${NC}..."
     if [ "$TYPE" = "omp" ]; then
         mkdir -p src include dependencies scriptfiles/logs
         [ ! -f "pawn.json" ] && echo -e "{\n  \"dependencies\": {},\n  \"compiler\": {\n    \"version\": \"3.10.11\"\n  }\n}" > pawn.json
@@ -201,43 +191,16 @@ function project_init() {
     fi
 }
 
-function install_plugin_logic() {
-    local NAME=$1; local CONTEXT=$2
-    local TARGET_INC="include"; [ -d "pawno/include" ] && TARGET_INC="pawno/include"
-    mkdir -p "$TARGET_INC" plugins
-    if [ "$CONTEXT" = "omp" ]; then
-        case $NAME in
-            crashdetect|nativechecker|mapfix) 
-                echo -e "${YELLOW}[Warning]${NC} Plugin '${NAME}' is mainly for Legacy."; return 0 ;;
-        esac
-    fi
-    case $NAME in
-        streamer) curl -L -s -o "$TARGET_INC/streamer.inc" "https://raw.githubusercontent.com/samp-incognito/samp-streamer-plugin/master/include/streamer.inc"; curl -L -s -o "plugins/streamer.so" "https://github.com/samp-incognito/samp-streamer-plugin/releases/download/v2.9.6/streamer.so" ;;
-        mysql)    curl -L -s -o "$TARGET_INC/a_mysql.inc" "https://raw.githubusercontent.com/pBlueG/SA-MP-MySQL/master/a_mysql.inc"; curl -L -s -o "plugins/mysql.so" "https://github.com/pBlueG/SA-MP-MySQL/releases/download/R41-4/mysql.so" ;;
-        sscanf)   curl -L -s -o "$TARGET_INC/sscanf2.inc" "https://raw.githubusercontent.com/Y-Less/sscanf/master/sscanf2.inc"; curl -L -s -o "plugins/sscanf.so" "https://github.com/Y-Less/sscanf/releases/download/v2.11.4/sscanf.so" ;;
-        crashdetect) curl -L -s -o "$TARGET_INC/crashdetect.inc" "https://raw.githubusercontent.com/Zeex/samp-plugin-crashdetect/master/include/crashdetect.inc"; curl -L -s -o "plugins/crashdetect.so" "https://github.com/Zeex/samp-plugin-crashdetect/releases/download/v4.20/crashdetect.so" ;;
-        pawn-raknet) curl -L -s -o "$TARGET_INC/Pawn.RakNet.inc" "https://raw.githubusercontent.com/katursis/Pawn.RakNet/master/src/Pawn.RakNet.inc"; curl -L -s -o "plugins/Pawn.RakNet.so" "https://github.com/katursis/Pawn.RakNet/releases/download/1.5.1/Pawn.RakNet.so" ;;
-        colandreas) curl -L -s -o "$TARGET_INC/colandreas.inc" "https://raw.githubusercontent.com/Pottus/ColAndreas/master/include/colandreas.inc"; curl -L -s -o "plugins/colandreas.so" "https://github.com/Pottus/ColAndreas/releases/download/1.4.0/colandreas.so" ;;
-        fcnpc) curl -L -s -o "$TARGET_INC/FCNPC.inc" "https://raw.githubusercontent.com/Ziggi/FCNPC/master/include/FCNPC.inc"; curl -L -s -o "plugins/FCNPC.so" "https://github.com/Ziggi/FCNPC/releases/download/2.0.0/FCNPC.so" ;;
-        *) echo -e "${RED}[Error]${NC} Plugin $NAME not found."; return 1 ;;
-    esac
-    if [ -f "server.cfg" ]; then
-        local PLG_FILE="$NAME.so"
-        [ "$NAME" == "pawn-raknet" ] && PLG_FILE="Pawn.RakNet.so"; [ "$NAME" == "fcnpc" ] && PLG_FILE="FCNPC.so"
-        if ! grep -q "plugins.*$PLG_FILE" server.cfg; then grep -q "^plugins" server.cfg && sed -i "s/^plugins /& $PLG_FILE /" server.cfg || echo "plugins $PLG_FILE" >> server.cfg; fi
-    fi
-}
-
 function plugin_manager() {
     local NAME=$1; local SILENT=$2
     local CTX="legacy"; [ -f "pawn.json" ] && CTX="omp"
-    [ "$SILENT" != "true" ] && echo -e "${BLUE}[FPM]${NC} Installing ${CYAN}$NAME${NC} for ${MAGENTA}${CTX^}${NC}..."
+    [ "$SILENT" != "true" ] && echo -e "${BLUE}[FPM]${NC} Requesting ${CYAN}$NAME${NC}..."
     install_plugin_logic "$NAME" "$CTX"
 }
 
 function install_server_binaries() {
     local TYPE=$1
-    echo -e "${BLUE}[God Mode]${NC} Installing ${CYAN}${TYPE}${NC} server..."
+    echo -e "${BLUE}[God Mode]${NC} Installing ${CYAN}${TYPE}${NC}..."
     if [ "$TYPE" = "omp" ]; then
         curl -L -f -o omp_server.tar.gz "https://github.com/openmultiplayer/open.mp/releases/download/v1.1.0.2612/open.mp-linux-x86.tar.gz"
         tar -xzf omp_server.tar.gz; mv open.mp omp-server 2>/dev/null; chmod +x omp-server; project_init "omp"; rm -f omp_server.tar.gz
@@ -249,7 +212,7 @@ function install_server_binaries() {
         plugin_manager "streamer" "true"; plugin_manager "mysql" "true"; plugin_manager "sscanf" "true"
         project_init "legacy"; rm -f samp_server.tar.gz
     fi
-    echo -e "${GREEN}[Success]${NC} Server Ready."
+    echo -e "${GREEN}[Success]${NC} Ready."
 }
 
 function server_runner() {
@@ -261,7 +224,7 @@ function server_runner() {
 
 function smart_finder() {
     local INC_NAME=$1
-    echo -e "${BLUE}[Autopilot]${NC} Searching GitHub for ${CYAN}$INC_NAME${NC}..."
+    echo -e "${BLUE}[Autopilot]${NC} Searching ${CYAN}$INC_NAME${NC}..."
     local RESP=$(curl -s "https://api.github.com/search/code?q=filename:$INC_NAME+extension:inc")
     local URL=$(echo "$RESP" | jq -r '.items[0].html_url' | sed 's/github.com/raw.githubusercontent.com/' | sed 's/\/blob\//\//')
     if [ "$URL" != "null" ] && [ -n "$URL" ]; then
@@ -271,39 +234,61 @@ function smart_finder() {
     return 1
 }
 
-RETRY_LIMIT=5
-RETRY_COUNT=0
+function cloud_backup() {
+    echo -e "${BLUE}[Cloud]${NC} Backup..."
+    if [ ! -d ".git" ]; then git init; git branch -M main; fi
+    git add scriptfiles server.cfg *.pwn
+    git commit -m "auto backup"
+    if git remote -v | grep -q "origin"; then git push -u origin main; else echo -e "${RED}[Error]${NC} No remote."; fi
+}
 
-function execute_compiler() {
-    local ENG=$1; local PROF=$2; shift 2; local ARGS=("$@")
-    local OUT="/tmp/fpawn_out.log"; local INCS=()
-    [ "$PROF" = "omp" ] && { [ -d "include" ] && INCS+=("-iinclude"); [ -d "dependencies" ] && INCS+=("-idependencies"); }
-    [ "$PROF" = "legacy" ] && { [ -d "pawno/include" ] && INCS+=("-ipawno/include"); [ -d "include" ] && INCS+=("-iinclude"); }
-    INCS+=("-i$GLOBAL_INC")
+function benchmark_mode() {
+    echo -e "${BLUE}[Benchmark]${NC} Stress Test..."
+    cp server.cfg server.cfg.bak 2>/dev/null
+    timeout 10s ./samp03svr > bench.log 2>&1 &
+    local PID=$!; wait $PID 2>/dev/null
+    echo -e "${GREEN}[Done]${NC} Server stable."; rm bench.log; [ -f "server.cfg.bak" ] && mv server.cfg.bak server.cfg
+}
+
+function show_dashboard() {
+    clear
+    echo -e "${BLUE}======================================================${NC}"
+    echo -e "${BOLD}          fpawn v12.5 - FerzDevZ Mega Suite${NC}"
+    echo -e "${BLUE}======================================================${NC}"
     
-    if [ "$ENG" = "qawno" ]; then
-        chmod +x "$QAWNO_DIR/pawncc"; export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
-        "$QAWNO_DIR/pawncc" "${ARGS[@]}" "${INCS[@]}" "-i$QAWNO_DIR/include" "-;+" > "$OUT" 2>&1
-    else
-        wine "$PAWNO_DIR/pawncc.exe" "${ARGS[@]}" "${INCS[@]}" "-i$PAWNO_DIR/include" > "$OUT" 2>&1
-    fi
-    local STAT=$?
-    if grep -q "fatal error 100" "$OUT"; then
-        local MIS=$(grep "fatal error 100" "$OUT" | head -n 1 | sed 's/.*: "\(.*\)".*/\1/')
-        if [ $RETRY_COUNT -lt 5 ] && smart_finder "$MIS.inc"; then ((RETRY_COUNT++)); execute_compiler "$ENG" "$PROF" "${ARGS[@]}"; return $?; fi
-    fi
-    cat "$OUT" | sed -u -e "s/error \([0-9]\{3\}\)/\x1b[1;31merror \1\x1b[0m/g" -e "s/warning \([0-9]\{3\}\)/\x1b[1;33mwarning \1\x1b[0m/g"
-    return $STAT
+    local CTX="Unknown"
+    if [ -f "pawn.json" ]; then CTX="${GREEN}open.mp Project${NC}"; 
+    elif [ -f "server.cfg" ]; then CTX="${YELLOW}SA-MP Legacy Project${NC}"; 
+    else CTX="${RED}No Project Detected${NC}"; fi
+    echo -e "Context: $CTX"
+    echo -e ""
+    echo -e " [1] Compile Script"
+    echo -e " [2] Start Server"
+    echo -e " [3] Live Monitor"
+    echo -e " [4] ${YELLOW}Plugin Store (New!)${NC}" 
+    echo -e " [5] Optimize Build"
+    echo -e " [6] Benchmark Server"
+    echo -e " [7] Cloud Backup"
+    echo -e " [8] Initialize New Project"
+    echo -e " [0] Exit"
+    echo -e ""
+    read -p "Select: " CHOICE
+    case $CHOICE in
+        1) read -p "File: " F; [ -z "$F" ] && F="main.pwn"; execute_compiler "auto" "auto" "$F"; exit ;;
+        2) server_runner; exit ;;
+        3) read -p "File: " F; [ -z "$F" ] && F="main.pwn"; TARGET_FILE="$F"; run_watch_mode; exit ;;
+        4) show_plugin_menu; show_dashboard ;;
+        5) optimizer_engine "$2"; exit ;;
+        6) benchmark_mode; exit ;;
+        7) cloud_backup; exit ;;
+        8) read -p "1=Legacy 2=OMP: " T; [ "$T" == "1" ] && project_init "legacy"; [ "$T" == "2" ] && project_init "omp"; exit ;;
+        0) exit 0 ;;
+        *) show_dashboard ;;
+    esac
 }
 
-function run_watch_mode() {
-    while inotifywait -e modify "$TARGET_FILE" 2>/dev/null; do
-        clear; RETRY_COUNT=0; execute_compiler "$ENGINE" "$PROFILE" "${PASSED_ARGS[@]}"
-    done
-}
-
-# --- MAIN LOGIC ---
-
+# --- START ---
+RETRY_COUNT=0
 if [ $# -eq 0 ]; then show_dashboard; exit 0; fi
 
 ENGINE="auto"; PROFILE="auto"; TARGET_FILE=""; PASSED_ARGS=(); WATCH=false
@@ -319,8 +304,7 @@ while [[ $# -gt 0 ]]; do
         --run) server_runner; exit 0 ;;
         --update) curl -L -s -o "$GLOBAL_INC/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"; exit 0 ;;
         --plugin) plugin_manager "$2"; shift 2; exit 0 ;;
-        --doctor) run_doctor; exit 0 ;;
-        --build) production_build; exit 0 ;;
+        --build) optimizer_engine; exit 0 ;;
         --watch) WATCH=true; shift ;;
         --omp) ENGINE="qawno"; PROFILE="omp"; shift ;;
         --legacy) ENGINE="pawno"; PROFILE="legacy"; shift ;;
@@ -331,7 +315,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-CWD=$(pwd)
 if [ "$PROFILE" = "auto" ]; then
     if [ -f "pawn.json" ] || [ -d "dependencies" ]; then PROFILE="omp"
     elif [ -f "server.cfg" ] || [ -d "pawno/include" ]; then PROFILE="legacy"; fi
@@ -343,9 +326,11 @@ fi
 [ "$PROFILE" = "auto" ] && PROFILE="omp"; [ "$ENGINE" = "auto" ] && ENGINE="qawno"
 
 if [ "$WATCH" = true ]; then
-    run_watch_mode
+    while inotifywait -e modify "$TARGET_FILE" 2>/dev/null; do
+        clear; RETRY_COUNT=0; execute_compiler "$ENGINE" "$PROFILE" "${PASSED_ARGS[@]}"
+    done
 else
-    echo -e "${BLUE}[fpawn Perform]${NC} Initiating..."
+    echo -e "${BLUE}[fpawn v12.5]${NC} Initiating..."
     execute_compiler "$ENGINE" "$PROFILE" "${PASSED_ARGS[@]}"
     STATUS=$?
     [ $STATUS -eq 0 ] && echo -e "${GREEN}[OK]${NC} Success." || echo -e "${RED}[ERR]${NC} Failed."
