@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 16.0 (Intelligence & Mastery Edition)
+# Version: 16.1 (Fine-tuned Intelligence)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -29,7 +29,6 @@ CYAN='\033[38;5;51m'
 MAGENTA='\033[38;5;201m'
 ORANGE='\033[38;5;208m'
 BOLD='\033[1m'
-UNDER='\033[4m'
 NC='\033[0m'
 
 # --- CONFIGURATION ---
@@ -46,82 +45,75 @@ function load_config() {
     fi
 }
 
+# --- HELPERS ---
+
+function find_entry_point() {
+    # 1. Check Root
+    [ -f "main.pwn" ] && { echo "main.pwn"; return; }
+    # 2. Check src/
+    [ -f "src/main.pwn" ] && { echo "src/main.pwn"; return; }
+    # 3. Check gamemodes/
+    [ -f "gamemodes/main.pwn" ] && { echo "gamemodes/main.pwn"; return; }
+    # 4. Search any .pwn
+    local ANY=$(find . -maxdepth 2 -name "*.pwn" | head -n 1 | sed 's|^./||')
+    if [ -n "$ANY" ]; then echo "$ANY"; return; fi
+    echo ""
+}
+
 # --- MASTER INTELLIGENCE ---
 
 function project_scanner() {
     echo -e "${BLUE}[Autopilot]${NC} Initiating Neural Project Scan..."
-    local MAIN_FILE=""
-    [ -f "main.pwn" ] && MAIN_FILE="main.pwn"
-    [ -z "$MAIN_FILE" ] && [ -f "gamemodes/main.pwn" ] && MAIN_FILE="gamemodes/main.pwn"
+    local MAIN_FILE=$(find_entry_point)
     
     if [ -z "$MAIN_FILE" ]; then
-        MAIN_FILE=$(ls *.pwn 2>/dev/null | head -n 1)
-    fi
-
-    if [ -z "$MAIN_FILE" ]; then
-        echo -e "${RED}[Error]${NC} No .pwn entry point found to scan."
+        echo -e "${RED}[Error]${NC} No .pwn entry point detected recursively."
         return 1
     fi
 
     echo -e "${CYAN}[Scan]${NC} Component: ${BOLD}$MAIN_FILE${NC}"
     
-    # Extract includes
     local INCS=$(grep "#include" "$MAIN_FILE" | sed 's/.*<//;s/>.*//;s/.*"//;s/".*//' | sort -u)
     local MISSING=()
-    
     local SEARCH_PATHS=("include" "pawno/include" "dependencies" "$GLOBAL_INC")
     
     for INC in $INCS; do
-        # Exclude defaults
-        [[ "$INC" =~ ^(a_samp|open.mp|core|float|string|file|time|datagram|console)$ ]] && continue
-        
+        [[ "$INC" =~ ^(a_samp|open.mp|core|float|string|file|time|datagram|console|a_mysql|streamer|sscanf2)$ ]] && continue
         local FOUND=false
-        for PD in "${SEARCH_PATHS[@]}"; do
-            [ -f "$PD/$INC.inc" ] && { FOUND=true; break; }
-        done
-        
-        if [ "$FOUND" = false ]; then
-            MISSING+=("$INC")
-        fi
+        for PD in "${SEARCH_PATHS[@]}"; do [ -f "$PD/$INC.inc" ] && { FOUND=true; break; }; done
+        [ "$FOUND" = false ] && MISSING+=("$INC")
     done
 
     if [ ${#MISSING[@]} -eq 0 ]; then
         echo -e "${GREEN}[Verified]${NC} Ecosystem integrity 100%. No missing includes."
     else
         echo -e "${ORANGE}[Warning]${NC} Detected ${#MISSING[@]} missing dependencies:"
-        for M in "${MISSING[@]}"; do
-            echo -e " ❌ ${M}.inc"
-        done
+        for M in "${MISSING[@]}"; do echo -e " ❌ ${M}.inc"; done
         echo -e ""
         read -p "Would you like fpawn to search and fix these? [y/N] " ANS
         if [[ "$ANS" == "y" ]]; then
             for M in "${MISSING[@]}"; do
                 echo -e "${BLUE}[Fixer]${NC} Searching for $M..."
-                if ! smart_finder "$M.inc"; then
-                    dynamic_search "$M"
-                fi
+                smart_finder "$M.inc" || dynamic_search "$M"
             done
         fi
     fi
 }
 
 function static_analyst() {
-     local FILE=$1
-     [ -z "$FILE" ] && FILE="main.pwn"
-     echo -e "${BLUE}[Analyst]${NC} Inspecting ${CYAN}$FILE${NC} architecture..."
+     local FILE=$(find_entry_point)
+     [ -z "$FILE" ] && { echo -e "${RED}[Error]${NC} Entry point missing."; return 1; }
      
-     if ! grep -q "main()" "$FILE"; then
-         echo -e " [!] ${YELLOW}Notice:${NC} Entry point 'main()' missing (Required for some compilers)."
-     fi
+     echo -e "${BLUE}[Analyst]${NC} Inspecting ${CYAN}$FILE${NC} architecture..."
+     grep -q "main()" "$FILE" || echo -e " [!] ${YELLOW}Notice:${NC} Entry point 'main()' missing."
      
      local LINES=$(wc -l < "$FILE")
-     echo -e " [+] ${GREEN}Volume:${NC} $LINES lines of Pawn."
+     echo -e " [+] ${GREEN}Volume:${NC} $LINES lines detected."
      
-     if grep -q "DOF2" "$FILE"; then
-         echo -e " [i] ${CYAN}Legacy Tip:${NC} You are using DOF2. Consider migrating to MySQL for v16.0 performance."
-     fi
+     [ -f "pawn.json" ] && echo -e " [i] ${CYAN}Logic:${NC} Modern open.mp architecture detected."
+     [ -f "server.cfg" ] && echo -e " [i] ${YELLOW}Logic:${NC} Legacy SA-MP architecture detected."
      
-     echo -e "${GREEN}[Status]${NC} Analysis complete. Architecture is stable."
+     echo -e "${GREEN}[Status]${NC} Analysis complete."
 }
 
 # --- SEARCH & CLONER ---
@@ -137,26 +129,13 @@ function dynamic_search() {
     local QUERY=$1
     echo -e "${BLUE}[Search]${NC} Navigating Galaxy for '${CYAN}$QUERY${NC}'..."
     
-    local PLUGINS=("streamer" "mysql" "sscanf" "crashdetect" "nativechecker" "mapfix" "pawn-raknet" "colandreas" "fcnpc" "samp-voice" "discord-connector" "pawn-regex" "whirlpool" "bcrypt" "totp" "skyline" "dns" "socket" "pawn-plus")
-    local FOUND_LOCAL=()
-    for PLG in "${PLUGINS[@]}"; do [[ "$PLG" == *"$QUERY"* ]] && FOUND_LOCAL+=("$PLG"); done
-    
-    if [ ${#FOUND_LOCAL[@]} -gt 0 ]; then
-        echo -e "${GREEN}[Master Store]${NC}"
-        for PLG in "${FOUND_LOCAL[@]}"; do echo -e " - ${BOLD}$PLG${NC} (fpawn --plugin $PLG)"; done
-        echo ""
-    fi
-
     echo -e "${YELLOW}[Neural Link]${NC} Querying GitHub Hub..."
-    # Robust JQ Parsing
     local SEARCH_URL="https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars"
     local JSON=$(curl -s "$SEARCH_URL")
     
+    local RESULTS=""
     if command -v jq &> /dev/null; then
-        local RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
-    else
-        # Fallback to crude parsing if jq is missing (though install.sh should handle it)
-        local RESULTS=$(echo "$JSON" | grep -o "\"full_name\": \"[^\"]*\", \"html_url\": \"[^\"]*\"" | head -n 5 | sed 's/"full_name": //;s/"html_url": //;s/"//g;s/, /|/g')
+        RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
     fi
 
     if [ -n "$RESULTS" ]; then
@@ -164,7 +143,7 @@ function dynamic_search() {
         IFS=$'\n'
         for RES in $RESULTS; do
             local FNAME=$(echo "$RES" | cut -d'|' -f1); local FURL=$(echo "$RES" | cut -d'|' -f2); local FDESC=$(echo "$RES" | cut -d'|' -f3)
-            URLS+=("$FURL"); NAMES+=("${FNAME#*/}")
+            URLS+=( "$FURL" ); NAMES+=( "${FNAME#*/}" )
             echo -e " [$i] ${BOLD}${CYAN}$FNAME${NC}"
             [ -n "$FDESC" ] && [[ "$FDESC" != "null" ]] && echo -e "     ${MAGENTA}Note:${NC} $FDESC"
             echo -e "     ${BLUE}Repo:${NC} $FURL"
@@ -188,7 +167,7 @@ function dynamic_search() {
 function show_header() {
     clear
     echo -e " ${BLUE}┌──────────────────────────────────────────────────────────┐${NC}"
-    echo -e " ${BLUE}│${NC}${BOLD}${CYAN}      fpawn v16.0 - FerzDevZ Intelligence & Mastery       ${NC}${BLUE}│${NC}"
+    echo -e " ${BLUE}│${NC}${BOLD}${CYAN}      fpawn v16.1 - FerzDevZ Fine-tuned Intelligence      ${NC}${BLUE}│${NC}"
     echo -e " ${BLUE}└──────────────────────────────────────────────────────────┘${NC}"
     local CTX="${RED}NO CONTEXT${NC}"
     [ -f "pawn.json" ] && CTX="${GREEN}OPEN.MP ECOSYSTEM${NC}"
@@ -200,7 +179,7 @@ function show_header() {
 function show_dashboard() {
     show_header
     echo -e "  ${BOLD}ENGINEERING${NC}                    ${BOLD}INTELLIGENCE${NC}"
-    echo -e "  [1] Compile Script             [4] ${YELLOW}Ultra-Search (GitHub)${NC}"
+    echo -e "  [1] Compile Script             [4] ${YELLOW}Actionable Search${NC}"
     echo -e "  [2] Start Master Server        [5] ${CYAN}Analyze Architecture${NC}"
     echo -e "  [3] Live Matrix Monitor        [6] ${GREEN}Project Autopilot (Scan)${NC}"
     echo -e ""
@@ -212,14 +191,13 @@ function show_dashboard() {
     echo -e " ${BLUE}────────────────────────────────────────────────────────────${NC}"
     read -p " Selection Master: " CHOICE
     case $CHOICE in
-        1) read -p " Target [.pwn]: " F; [ -z "$F" ] && F="main.pwn"; execute_compiler "auto" "auto" "$F"; exit ;;
+        1) local F=$(find_entry_point); [ -z "$F" ] && F="main.pwn"; execute_compiler "auto" "auto" "$F"; exit ;;
         2) server_runner; exit ;;
-        3) read -p " Target [.pwn]: " F; [ -z "$F" ] && F="main.pwn"; run_watch_mode "$F"; exit ;;
-        4) read -p " Keywords: " S; dynamic_search "$S"; read -p "Press Enter to return..."; show_dashboard ;;
-        5) read -p " Target [.pwn]: " F; [ -z "$F" ] && F="main.pwn"; static_analyst "$F"; read -p "Press Enter..."; show_dashboard ;;
+        3) local F=$(find_entry_point); [ -z "$F" ] && F="main.pwn"; run_watch_mode "$F"; exit ;;
+        4) read -p " Keywords: " S; dynamic_search "$S"; read -p "Press Enter..."; show_dashboard ;;
+        5) static_analyst; read -p "Press Enter..."; show_dashboard ;;
         6) project_scanner; read -p "Press Enter..."; show_dashboard ;;
-        7) optimizer_engine "$2"; exit ;;
-        8) benchmark_mode; exit ;;
+        7) optimizer_engine; exit ;;
         9) read -p " (1)Legacy (2)OMP: " T; [ "$T" == "1" ] && install_server_binaries "legacy"; [ "$T" == "2" ] && install_server_binaries "omp"; exit ;;
         10) library_updater; read -p "Press Enter..."; show_dashboard ;;
         11) self_update; exit ;;
@@ -255,19 +233,18 @@ function execute_compiler() {
 }
 
 function optimizer_engine() {
-    echo -e "${BLUE}[Master]${NC} Powering up optimization grids..."
-    local T=$1; [ -z "$T" ] && T="main.pwn"
+    local T=$(find_entry_point); [ -z "$T" ] && T="main.pwn"
+    echo -e "${BLUE}[Master]${NC} Release optimization for $T..."
     execute_compiler "auto" "auto" "-O2" "$T"
 }
 
 function self_update() {
-    echo -e "${CYAN}[Sync]${NC} Linking to Master Repository..."
     local R="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/fpawn"
     curl -L -s -o /tmp/fupd "$R"
     if [ $? -eq 0 ]; then
         local NV=$(grep "Version:" /tmp/fupd | head -n 1 | awk '{print $3}')
-        if [ "$NV" != "16.0" ] && [ -n "$NV" ]; then
-             echo -e "${YELLOW}[Alert]${NC} Master v$NV available. Elevating current system..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
+        if [ "$NV" != "16.1" ] && [ -n "$NV" ]; then
+             echo -e "${YELLOW}[Alert]${NC} Master v$NV available. Elevating..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
         else echo -e "${GREEN}[Success]${NC} Mastery is up-to-date."; fi
     fi
 }
@@ -311,10 +288,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --search) dynamic_search "$2"; exit 0 ;;
         --scan) project_scanner; exit 0 ;;
-        --analyze) static_analyst "$2"; exit 0 ;;
+        --analyze) static_analyst; exit 0 ;;
         --update-self) self_update; exit 0 ;;
         --plugin) plugin_manager "$2"; exit 0 ;;
-        *.pwn) PASSED_ARGS+=("$1"); shift ;;
+        *.pwn) PASSED_ARGS+=( "$1" ); shift ;;
         *) shift ;;
     esac
 done

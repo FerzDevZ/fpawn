@@ -1,3 +1,11 @@
+#!/bin/bash
+
+# fpawn Global Installer
+# FerzDevZ Intelligence & Mastery
+
+INSTALL_DIR="$HOME/.ferzdevz/fpawn"
+BIN_DIR="$HOME/.local/bin"
+
 echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v16.0 (Mastery Edition)..."
 
 # 0. Check Dependencies
