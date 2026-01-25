@@ -1,44 +1,37 @@
-# fpawn v11.0 - FerzDevZ Cloud & AI Edition
+# fpawn v12.0 - FerzDevZ Performance Suite
 
-Tidak hanya mengelola, `fpawn` sekarang bisa **Menulis Kode** dan **Menyimpan Data ke Cloud**.
+Versi ini didedikasikan untuk **KECEPATAN** dan **STABILITAS**. Kami membuang generator kode (karena Anda sudah jago coding) dan menggantinya dengan tool optimasi tingkat lanjut.
 
-## Fitur Baru: Logic Generator (AI Template)
+## Fitur Baru: Engineering Tools
 
-Malas ngetik boilerplate command atau dialog? Biarkan `fpawn` yang menulisnya.
-
-**Cara Pakai:**
-```bash
-fpawn --gen cmd:heal
-```
-*Output:*
-```pawn
-CMD:heal(playerid, params[]) {
-    if (isnull(params)) return SendClientMessage(playerid, -1, "Usage: /heal [params]");
-    // TODO: Add logic for heal
-    return 1;
-}
-```
-
-**Template Lainnya:**
-- `fpawn --gen dialog:register` -> Membuat struktur Dialog & Response.
-- `fpawn --gen mysql:loadplayer` -> Membuat callback loading data MySQL.
-
-## Fitur Baru: Cloud Backup
-
-Jangan pernah kehilangan data server lagi. Fitur ini akan otomatis mem-backup script dan config Anda ke GitHub (Private/Public Repo).
+### 1. Production Optimizer (`--optimize`)
+Membuat file `.amx` sekecil dan secepat mungkin untuk rilis publik.
+- **Strip Debug Info**: Menghapus simbol debug (-d0) untuk mengurangi ukuran file drastis.
+- **Max Optimization**: Mengaktifkan flag `-O3` untuk performa eksekusi tertinggi.
+- **Output**: Menghasilkan file yang bersih, cocok untuk upload ke hosting.
 
 **Cara Pakai:**
 ```bash
-fpawn --backup
+fpawn --optimize gamemode.pwn
 ```
-`fpawn` akan melakukan `git add`, `commit` otomatis, dan `push` ke branch main Anda dalam satu detik.
 
-## Master Dashboard v11
-Semua fitur di atas bisa diakses lewat menu visual:
+### 2. Server Benchmarking (`--benchmark`)
+Stress-test server Anda sebelum pemain masuk.
+- **Startup Test**: Mengukur seberapa cepat server booting dalam milidetik.
+- **Tick Stability**: Menjalankan simulasi beban selama 10 detik.
+- **Log Analysis**: Mencari error tersembunyi selama beban tinggi.
+
+**Cara Pakai:**
 ```bash
-fpawn
+fpawn --benchmark
 ```
-Pilih **[5] Logic Generator** atau **[6] Cloud Backup**.
+
+## Tetap Powerfull (Fitur Sebelumnya)
+Semua fitur manajemen server tetap ada:
+- `fpawn --create-server`
+- `fpawn --plugin`
+- `fpawn --doctor`
+- `fpawn --backup`
 
 ---
-**Powered by FerzDevZ**
+**Powered by FerzDevZ** (Engineering Excellence)
