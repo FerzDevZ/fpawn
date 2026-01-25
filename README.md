@@ -1,33 +1,29 @@
-# fpawn v12.5 - FerzDevZ Mega Store & Stability
+# fpawn v13.0 - FerzDevZ Total Integration
 
-Update ini membawa kestabilan maksimal dan toko plugin terbesar yang pernah ada di sejarah `fpawn`.
+Evolusi terakhir. `fpawn` kini menjadi aplikasi sistem yang sejati.
 
-## Fitur Baru: Mega Plugin Store
+## Fitur Baru: Global Installation
 
-Kami telah menambahkan puluhan plugin baru ke database `fpawn`. Cukup pilih dari menu dashboard.
-
-| Kategori | Plugin Baru | Kegunaan |
-| :--- | :--- | :--- |
-| **Networking** | `pawn-raknet`, `dns` | Manipulasi paket & Resolusi domain |
-| **Physics** | `colandreas`, `mapfix` | Raycasting map & Fix object bolong |
-| **Security** | `totp` | Google Authenticator 2FA |
-| **Features** | `samp-voice`, `discord-connector` | Voice chat & Integrasi Discord |
-| **Utils** | `nativechecker`, `regex` | Debugging & Text searching |
+Anda tidak perlu menjalankan `fpawn` dari folder khusus lagi. Install sekali, pakai di mana saja.
 
 **Cara Install:**
-Buka `fpawn` -> **[4] Plugin Store**.
+1.  Buka terminal di folder project ini.
+2.  Jalankan installer:
+    ```bash
+    ./install.sh
+    ```
+3.  Restart terminal Anda.
 
-## Perbaikan: Stable Optimized Build (`--optimize`)
+Sekarang, Anda bisa:
+- Buka terminal di folder `Documents` -> ketik `fpawn`.
+- Buka terminal di folder `Downloads` -> ketik `fpawn`.
+- `fpawn` selalu siap melayani Anda.
 
-Fitur optimasi build kini berjalan dengan mode **Safe High Performance (-O2)**.
-- Menjamin kompilasi sukses 100% tanpa error syntax.
-- Performa server tetap meningkat signifikan dibanding kompilasi standar.
-- Menghapus masalah kompatibilitas dengan beberapa versi compiler Linux.
+## Lokasi Instalasi
+Semua file system `fpawn` tersimpan rapi & aman di:
+`~/.ferzdevz/fpawn/`
 
-**Cara Pakai:**
-```bash
-fpawn --optimize gamemode.pwn
-```
+Ini memastikan tool Anda tidak akan terhapus tidak sengaja jika Anda membersihkan folder download.
 
 ---
-**Powered by FerzDevZ**
+**Powered by FerzDevZ** (The Complete Ecosystem)
