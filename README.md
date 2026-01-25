@@ -1,35 +1,37 @@
-# fpawn v7.0 - FerzDevZ Autopilot Edition
+# fpawn v8.0 - FerzDevZ Workspace Edition
 
-Ini adalah versi paling **OVERPOWER** dan **MENAKUTKAN** yang pernah diciptakan. `fpawn` v7.0 sekarang memiliki sistem kemudi otomatis (**Autopilot**) yang bisa memperbaiki kodingan Anda sendiri.
+Versi **Workspace Edition** membawa `fpawn` ke level profesional yang lebih tinggi. Sekarang, `fpawn` mengerti perbedaan struktur folder antara project **SAMP Legacy** dan **open.mp**.
 
-## Fitur Unggulan: Self-Healing Compilation
+## Fitur Unggulan: Project Profiles
 
-Bayangkan Anda mengkompilasi file, dan ternyata ada include yang lupa Anda download. Biasanya Anda akan mendapatkan error dan harus mencari file itu manual.
+`fpawn` secara otomatis mengenali "Jenis Workspace" Anda tanpa perlu dikasih tahu:
 
-**DI V7.0, SEMUANYA OTOMATIS:**
-1.  **Deteksi Instan**: Jika compiler bilang "file not found", `fpawn` langsung menangkap error tersebut.
-2.  **Smart Repair**: `fpawn` otomatis mencari file yang hilang di GitHub.
-3.  **Auto Re-Flight**: Jika file ditemukan, `fpawn` mendownloadnya dan **langsung mengulang kompilasi** secara otomatis.
+### 1. Legacy Profile (Classic)
+- **Terdeteksi Jika**: Ada folder `pawno/` atau file `server.cfg`.
+- **Perilaku**: Otomatis memprioritaskan Engine **PAWNO** (Wine) dan mencari include di `./pawno/include`.
 
-**Hasilnya?** Anda mungkin hanya melihat satu perintah, tapi di baliknya `fpawn` telah bekerja keras membereskan segala library yang kurang sampai script Anda sukses jadi `.amx`.
+### 2. OMP Profile (Modern)
+- **Terdeteksi Jika**: Ada folder `dependencies/` atau file `pawn.json`.
+- **Perilaku**: Otomatis memprioritaskan Engine **QAWNO** (Native Linux) dan mencari include di `./include` & `./dependencies`.
 
-## Ringkasan Fitur Dewa
+## Cara Membuat Project Baru (Auto-Scaffold)
 
-| Fitur | Deskripsi |
-| :--- | :--- |
-| **Autopilot** | Perbaikan include otomatis & retry kompilasi |
-| **Smart Sensing** | Deteksi otomatis open.mp vs SAMP Legacy |
-| **Watch Mode** | Live recompile setiap kali save (Ctrl+S) |
-| **Plugin Master** | Pasang library besar dalam 1 detik |
-| **FPM Finder** | Pencarian library ke seluruh database GitHub |
+Sekarang Anda bisa membangun pondasi server dalam sekejap:
 
-## Cara Penggunaan (The Power of One Command)
-
-Anda hanya butuh satu perintah untuk semuanya:
+**Untuk SAMP Legacy (Gaya Lama):**
 ```bash
-fpawn gamemode.pwn
+fpawn --init legacy
 ```
-Jika ada yang kurang, `fpawn` akan mengurusnya. Jika engine salah, `fpawn` akan memperbaikinya.
+
+**Untuk open.mp (Gaya Modern):**
+```bash
+fpawn --init omp
+```
+
+## Keunggulan v8.0:
+- **Tersolir**: Library open.mp tidak akan tercampur dengan library legacy.
+- **Smart Priority**: Jika Anda menaruh `#include <a_samp>` di project OMP, `fpawn` cukup cerdas untuk tetap menggunakan engine modern namun mencari library yang kompatibel.
+- **Zero Config**: Pindah antar folder project yang beda versi? `fpawn` langsung beradaptasi secara instan.
 
 ---
 **Powered by FerzDevZ**

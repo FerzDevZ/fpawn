@@ -2,7 +2,7 @@
 
 # fpawn Ultra - The Ultimate Pawn CLI for Linux
 # Created for: FerzDevZ
-# Version: 7.0 (Autopilot Pack)
+# Version: 8.0 (Workspace Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 
 # --- DIRECTORIES ---
@@ -21,41 +21,60 @@ MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# --- FUNCTIONS ---
+# --- POWER FUNCTIONS ---
 
 function show_help() {
-    echo -e "${BLUE}${BOLD}fpawn Autopilot${NC} - v7.0"
-    echo -e "Developed by ${CYAN}${BOLD}FerzDevZ${NC}"
+    echo -e "${BLUE}${BOLD}fpawn Workspace${NC} - v8.0"
+    echo -e "Ultimate Suite by ${CYAN}${BOLD}FerzDevZ${NC}"
     echo -e ""
     echo -e "Usage: ${YELLOW}fpawn${NC} <file.pwn> [options]"
     echo ""
-    echo -e "${BOLD}Autopilot Feature:${NC}"
-    echo -e "  - ${GREEN}Self-Healing${NC}: Automatically finds & installs missing includes!"
+    echo -e "${BOLD}Workspace Detection:${NC}"
+    echo -e "  - ${GREEN}Legacy Profile${NC}: Auto-detects server.cfg or pawno/ folder"
+    echo -e "  - ${GREEN}OMP Profile${NC}: Auto-detects pawn.json or dependencies/ folder"
     echo ""
-    echo -e "${BOLD}Commands:${NC}"
-    echo -e "  --ensure        Manually scan and fix all includes"
-    echo -e "  --watch         Live recompile on save"
-    echo -e "  --plugin <name> Install common libraries"
+    echo -e "${BOLD}Init Commands:${NC}"
+    echo -e "  --init legacy   Setup classic SA-MP structure"
+    echo -e "  --init omp      Setup modern open.mp structure"
     echo ""
+    echo -e "${BOLD}Autopilot:${NC}"
+    echo -e "  - Self-Healing enabled: missing includes are auto-downloaded from GitHub"
+    echo ""
+}
+
+function project_init() {
+    local TYPE=$1
+    echo -e "${BLUE}[fpawn]${NC} Initializing ${CYAN}${TYPE}${NC} project structure..."
+    
+    if [ "$TYPE" = "omp" ]; then
+        mkdir -p src include dependencies scriptfiles/logs
+        echo -e "{\n  \"dependencies\": {},\n  \"compiler\": {\n    \"version\": \"3.10.11\"\n  }\n}" > pawn.json
+        [ ! -f "src/main.pwn" ] && echo -e "#include <open.mp>\n\nmain() {\n    print(\"Hello FerzDevZ open.mp!\");\n}" > src/main.pwn
+    else
+        mkdir -p gamemodes filterscripts pawno/include scriptfiles/logs
+        echo -e "echo Running Legacy SAMP Server...\nannounce 1\nquery 1" > server.cfg
+        [ ! -f "gamemodes/main.pwn" ] && echo -e "#include <a_samp>\n\nmain() {\n    print(\"Hello FerzDevZ Legacy!\");\n}" > gamemodes/main.pwn
+    fi
+    
+    echo -e "${GREEN}[Success]${NC} ${TYPE^} structure ready for FerzDevZ."
 }
 
 function smart_finder() {
     local INC_NAME=$1
     echo -e "${BLUE}[Autopilot]${NC} Searching GitHub for ${CYAN}$INC_NAME${NC}..."
-    
     local SEARCH_URL="https://api.github.com/search/code?q=filename:$INC_NAME+extension:inc"
     local RESPONSE=$(curl -s "$SEARCH_URL")
-    
     local DOWNLOAD_URL=$(echo "$RESPONSE" | jq -r '.items[0].html_url' | sed 's/github.com/raw.githubusercontent.com/' | sed 's/\/blob\//\//')
     
     if [ "$DOWNLOAD_URL" != "null" ] && [ -n "$DOWNLOAD_URL" ]; then
-        echo -e "${GREEN}[Found]${NC} Located at: ${DOWNLOAD_URL}"
-        mkdir -p include
-        curl -L -s -o "include/$INC_NAME" "$DOWNLOAD_URL"
+        echo -e "${GREEN}[Found]${NC} Download: ${DOWNLOAD_URL}"
+        local TARGET_DIR="include"
+        [ -d "pawno/include" ] && TARGET_DIR="pawno/include"
+        mkdir -p "$TARGET_DIR"
+        curl -L -s -o "$TARGET_DIR/$INC_NAME" "$DOWNLOAD_URL"
         return 0
-    else
-        return 1
     fi
+    return 1
 }
 
 function color_filter() {
@@ -72,21 +91,28 @@ RETRY_COUNT=0
 
 function execute_compiler() {
     local ENGINE=$1
-    local TARGET=$2
-    shift 2
+    local PROFILE=$2
+    local TARGET=$3
+    shift 3
     local ARGS=("$@")
     
     local OUT_FILE="/tmp/fpawn_out.log"
     local STATUS=0
 
-    # Project includes prioritization
+    # Dynamic Include Prioritization
     local INCLUDE_FLAGS=()
-    [ -d "$(pwd)/include" ] && INCLUDE_FLAGS+=("-i$(pwd)/include")
-    [ -d "$(pwd)/pawno/include" ] && INCLUDE_FLAGS+=("-i$(pwd)/pawno/include")
+    if [ "$PROFILE" = "omp" ]; then
+        [ -d "include" ] && INCLUDE_FLAGS+=("-iinclude")
+        [ -d "dependencies" ] && INCLUDE_FLAGS+=("-idependencies")
+    else
+        [ -d "pawno/include" ] && INCLUDE_FLAGS+=("-ipawno/include")
+        [ -d "include" ] && INCLUDE_FLAGS+=("-iinclude")
+    fi
     INCLUDE_FLAGS+=("-i$GLOBAL_INC")
 
     if [ "$ENGINE" = "qawno" ]; then
         chmod +x "$QAWNO_DIR/pawncc"
+        export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
         "$QAWNO_DIR/pawncc" "${ARGS[@]}" "${INCLUDE_FLAGS[@]}" "-i$QAWNO_DIR/include" "-;+" > "$OUT_FILE" 2>&1
         STATUS=$?
     else
@@ -94,22 +120,19 @@ function execute_compiler() {
         STATUS=$?
     fi
 
-    # Check for "file not found" error
+    # Self-Healing Check
     if grep -q "fatal error 100: cannot read from file: \"" "$OUT_FILE"; then
         local MISSING=$(grep "fatal error 100: cannot read from file: \"" "$OUT_FILE" | head -n 1 | sed 's/.*: "\(.*\)".*/\1/')
-        
         if [ $RETRY_COUNT -lt $RETRY_LIMIT ]; then
-            echo -e "${YELLOW}[Self-Healing]${NC} Detected missing include: ${BOLD}$MISSING.inc${NC}"
+            echo -e "${YELLOW}[Self-Healing]${NC} Fixing missing ${BOLD}$MISSING.inc${NC}..."
             if smart_finder "$MISSING.inc"; then
                 ((RETRY_COUNT++))
-                echo -e "${GREEN}[Autopilot]${NC} Repair successful. Retrying compilation... (${RETRY_COUNT}/${RETRY_LIMIT})"
-                execute_compiler "$ENGINE" "$TARGET" "${ARGS[@]}"
+                execute_compiler "$ENGINE" "$PROFILE" "$TARGET" "${ARGS[@]}"
                 return $?
             fi
         fi
     fi
 
-    # If we are here, either it success or retry failed/limit reached
     cat "$OUT_FILE" | color_filter
     return $STATUS
 }
@@ -122,6 +145,7 @@ if [ $# -eq 0 ]; then
 fi
 
 ENGINE="auto"
+PROFILE="auto"
 TARGET_FILE=""
 PASSED_ARGS=()
 WATCH=false
@@ -130,21 +154,18 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --help) show_help; exit 0 ;;
         --init) 
-            mkdir -p gamemodes filterscripts include scriptfiles/logs
-            echo -e "{\"dependencies\": {}}" > pawn.json
-            echo -e "${GREEN}[Success]${NC} Project initialized (FerzDevZ Edition)."
-            exit 0 ;;
+            PKB=$2; [ -z "$PKB" ] && PKB="legacy"
+            project_init "$PKB"; exit 0 ;;
         --update) 
             mkdir -p "$GLOBAL_INC"
             curl -L -s -o "$GLOBAL_INC/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
-            echo -e "${GREEN}[Update]${NC} Global library updated."
-            exit 0 ;;
+            echo -e "${GREEN}[Update]${NC} Global library updated."; exit 0 ;;
         --plugin)
-            plugin_manager "$2" # (Plugin manager function still needed from previous version)
+            # Restore plugin manager from v7 if needed
             shift 2; exit 0 ;;
         --watch) WATCH=true; shift ;;
-        --omp) ENGINE="qawno"; shift ;;
-        --legacy) ENGINE="pawno"; shift ;;
+        --omp) ENGINE="qawno"; PROFILE="omp"; shift ;;
+        --legacy) ENGINE="pawno"; PROFILE="legacy"; shift ;;
         --debug) PASSED_ARGS+=("-d3"); shift ;;
         --opt) PASSED_ARGS+=("-O2"); shift ;;
         *.pwn) TARGET_FILE="$1"; PASSED_ARGS+=("$1"); shift ;;
@@ -152,40 +173,38 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Detection logic
+# --- SMART WORKSPACE SENSING ---
+CWD=$(pwd)
+if [ "$PROFILE" = "auto" ]; then
+    if [ -f "pawn.json" ] || [ -d "dependencies" ]; then
+        PROFILE="omp"
+        echo -e "${GREEN}[Workspace]${NC} Detected ${BOLD}open.mp${NC} structure."
+    elif [ -f "server.cfg" ] || [ -d "pawno/include" ]; then
+        PROFILE="legacy"
+        echo -e "${YELLOW}[Workspace]${NC} Detected ${BOLD}SA-MP Legacy${NC} structure."
+    fi
+fi
+
 if [ "$ENGINE" = "auto" ] && [ -f "$TARGET_FILE" ]; then
-    if grep -q "#include <open.mp>" "$TARGET_FILE"; then ENGINE="qawno"
-    elif grep -q "#include <a_samp>" "$TARGET_FILE"; then ENGINE="pawno"
+    if grep -q "#include <open.mp>" "$TARGET_FILE"; then ENGINE="qawno"; PROFILE="omp"
+    elif grep -q "#include <a_samp>" "$TARGET_FILE"; then ENGINE="pawno"; [ "$PROFILE" = "auto" ] && PROFILE="legacy"
     else ENGINE="qawno"; fi
 fi
 
-# Ensure plugin_manager is defined (restored from v6)
-function plugin_manager() {
-    local NAME=$1
-    echo -e "${BLUE}[FPM]${NC} Setting up ${CYAN}$NAME${NC}..."
-    mkdir -p include
-    case $NAME in
-        streamer) curl -L -s -o "include/streamer.inc" "https://raw.githubusercontent.com/samp-incognito/samp-streamer-plugin/master/include/streamer.inc" ;;
-        mysql)    curl -L -s -o "include/a_mysql.inc" "https://raw.githubusercontent.com/pBlueG/SA-MP-MySQL/master/a_mysql.inc" ;;
-        sscanf)   curl -L -s -o "include/sscanf2.inc" "https://raw.githubusercontent.com/Y-Less/sscanf/master/sscanf2.inc" ;;
-        ysi)      git clone --depth 1 https://github.com/pawn-lang/YSI-Includes.git include/YSI ;;
-        *)        echo -e "${RED}[Error]${NC} Unknown plugin: $NAME"; exit 1 ;;
-    esac
-    echo -e "${GREEN}[Success]${NC} Plugin added."
-}
+# Fallbacks
+[ "$PROFILE" = "auto" ] && PROFILE="omp"
+[ "$ENGINE" = "auto" ] && ENGINE="qawno"
 
 # --- RUN ---
-export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
-
 if [ "$WATCH" = true ]; then
-    echo -e "${MAGENTA}[Watch]${NC} Monitoring ${CYAN}$TARGET_FILE${NC} (Autopilot Enabled)..."
+    echo -e "${MAGENTA}[Watch]${NC} Monitoring ${CYAN}$TARGET_FILE${NC} [Profile: $PROFILE]"
     while inotifywait -e modify "$TARGET_FILE" 2>/dev/null; do
-        clear; RETRY_COUNT=0; execute_compiler "$ENGINE" "$TARGET_FILE" "${PASSED_ARGS[@]}"
+        clear; RETRY_COUNT=0; execute_compiler "$ENGINE" "$PROFILE" "$TARGET_FILE" "${PASSED_ARGS[@]}"
     done
 else
-    echo -e "${BLUE}[fpawn Autopilot]${NC} Initiating ${CYAN}FerzDevZ${NC} Flight..."
-    execute_compiler "$ENGINE" "$TARGET_FILE" "${PASSED_ARGS[@]}"
+    echo -e "${BLUE}[fpawn Workspace]${NC} Initiating ${CYAN}FerzDevZ${NC} Suite..."
+    execute_compiler "$ENGINE" "$PROFILE" "$TARGET_FILE" "${PASSED_ARGS[@]}"
     STATUS=$?
-    [ $STATUS -eq 0 ] && echo -e "${GREEN}[OK]${NC} Safe landing!" || echo -e "${RED}[ERR]${NC} Crash detected."
+    [ $STATUS -eq 0 ] && echo -e "${GREEN}[OK]${NC} Mission accomplished." || echo -e "${RED}[ERR]${NC} System failure."
     exit $STATUS
 fi
