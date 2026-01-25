@@ -1,46 +1,45 @@
-# fpawn v5.0 - FerzDevZ Omnipotent Pack
+# fpawn v6.0 - FerzDevZ FPM Edition (Smart Finder)
 
-Ini adalah versi **terkuat** (Overpower) dari `fpawn`. Anda sekarang memiliki kendali penuh atas ekosistem Pawn Anda di Linux.
+Selamat! Anda sekarang memegang tool CLI Pawn **paling cerdas** di dunia Linux. `fpawn` bukan sekadar compiler, tapi adalah asisten cerdas yang memahami kebutuhan proyek Anda.
 
-## Fitur "Omnipotent" (Dewa)
+## Fitur Unggulan v6.0 (FPM Edition)
 
-### 1. Watch Mode (`--watch`)
-Ngoding tanpa perlu pindah tab! `fpawn` akan terus memantau file `.pwn` Anda. Setiap kali Anda tekan `Ctrl+S`, `fpawn` langsung mengkompilasi ulang secara instan.
+### 1. FerzDevZ Smart Finder (`--ensure`)
+Pernah kesal karena error `cannot read from file` saat kompilasi? Cukup jalankan:
+```bash
+fpawn gamemode.pwn --ensure
+```
+`fpawn` akan otomatis memindai script Anda, mendeteksi include yang hilang, mencarinya di GitHub, dan memasangnya secara otomatis ke folder `include/` Anda.
+
+### 2. Dual-Engine Architecture (Smart Sensing)
+`fpawn` secara otomatis mendeteksi apakah script Anda untuk **open.mp** atau **SAMP Legacy**:
+- Menggunakan engine **QAWNO** untuk open.mp (Native Linux).
+- Menggunakan engine **PAWNO** untuk SAMP Legacy (via Wine).
+
+### 3. Watch Mode (`--watch`)
+Kompilasi otomatis setiap kali Anda menyimpan file. Tekan Ctrl+S, dan `fpawn` langsung bekerja di latar belakang.
 ```bash
 fpawn gamemode.pwn --watch
 ```
 
-### 2. Plugin Master (`--plugin <name>`)
-Ribet download library? Sekarang tinggal sebut namanya, `fpawn` yang ambil filenya.
+### 4. Plugin Master (`--plugin`)
+Pasang library populer dalam sekejap:
 ```bash
 fpawn --plugin streamer
 fpawn --plugin mysql
 fpawn --plugin ysi
 fpawn --plugin sscanf
 ```
-*File `.inc` akan otomatis diletakkan di folder `include/` project Anda.*
 
-### 3. Integrated Decompiler (`--decompile`)
-Ingin mengintip cara kerja file `.amx`? Gunakan decompiler bawaan:
-```bash
-fpawn --decompile gamemode.amx
-```
-
-### 4. Smart Sensing (Auto Engine)
-Sama seperti v4.0, `fpawn` tetap otomatis mendeteksi antara **open.mp** dan **SAMP Legacy** tanpa perlu Anda setel manual.
-
-## Ringkasan Perintah
+## Ringkasan Perintah Penting
 
 | Perintah | Deskripsi |
 | :--- | :--- |
-| `fpawn file.pwn --watch` | Recompile otomatis setiap save |
-| `fpawn --plugin streamer` | Download include Streamer instan |
-| `fpawn --decompile file.amx`| Bongkar file AMX jadi assembler |
-| `fpawn --init` | Bangun project structure FerzDevZ |
+| `fpawn file.pwn --ensure` | Scan & pasang include yang hilang otomatis |
+| `fpawn file.pwn --watch` | Auto-recompile setiap save |
+| `fpawn --init` | Bangun struktur proyek FerzDevZ baru |
 | `fpawn --update` | Update standard library global |
-
-## Penting:
-Jika fitur `--watch` tidak jalan, jalankan ulang `sudo ./setup.sh` untuk memasang `inotify-tools`.
+| `fpawn --decompile file.amx`| Bongkar file AMX jadi assembler |
 
 ---
 **Powered by FerzDevZ**
