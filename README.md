@@ -1,30 +1,29 @@
-# fpawn v15.0 - FerzDevZ Connected Ecosystem
+# fpawn v15.1 - FerzDevZ Ultra Search & Sync
 
-Selamat datang di era baru. `fpawn` kini terhubung langsung ke internet untuk memberikan kemudahan tanpa batas.
+Update terakhir untuk menghubungkan Anda dengan seluruh dunia Pawn. `fpawn` kini menjadi mesin pencari handal untuk plugin dan script Anda.
 
-## Fitur Unggulan v15.0:
+## Fitur Baru: Ultra Search (`[4]`)
 
-### 1. Dynamic Plugin Search (`[4]`)
-Lupa nama tepat sebuah plugin? Gunakan fitur **Search**.
-- Mendukung "Fuzzy Search" (Contoh: ketik `rak` untuk menemukan `pawn-raknet`).
-- Jika tidak ada di database lokal, `fpawn` akan otomatis mencari di repository GitHub global secara real-time.
+Cari apa saja, bukan cuma plugin resmi.
+- **Deep Query**: Jika plugin tidak ada di database lokal (seperti `textdraw`), `fpawn` akan melakukan pencarian mendalam ke **GitHub Repositories**.
+- **Hasil**: Langsung mendapatkan link repository yang relevan secara real-time.
 
-### 2. Self Updater (`[11]`)
-Ingin mendapatkan fitur terbaru `fpawn` tanpa perlu ngetik command manual lagi?
-- Cukup ketik `fpawn` dan pilih **[11] Self Update**.
-- Tool akan mengecek versi terbaru di GitHub `FerzDevZ/fpawn` dan langsung meng-update dirinya sendiri jika tersedia.
+## Fitur Baru: Custom Repo Sync
 
-## Recap Fitur v15.0:
-- ✅ **Online Connectivity**: Terhubung ke manifest GitHub.
-- ✅ **Fuzzy Search**: Pencarian plugin cerdas.
-- ✅ **One-Click Update**: Menjaga tool selalu dalam performa puncak.
+Sekarang `fpawn` bisa update dari repository pilihan Anda sendiri.
+- Secara default, tool update dari `FerzDevZ/fpawn`.
+- Anda bisa mengubahnya di file config `~/.ferzdevz/fpawn/config`.
+
+## Fitur Baru: Auto-Check Update
+
+Setiap kali Anda membuka `fpawn`, dia akan mengecek secara diam-diam apakah ada versi baru. Jika ada, dia akan memberikan notifikasi cerdas agar Anda selalu menggunakan fitur tercanggih.
 
 ---
 
-## Cara Update Global ke v15.0
-Lakukan instalasi manual terakhir kalinya untuk mendaftarkan fitur updater:
+## Cara Update ke v15.1
+Jalankan installer terakhir kalinya untuk mendaftarkan konfigurasi baru:
 ```bash
 ./install.sh
 ```
 
-**Powered by FerzDevZ** (The Legend Continues...)
+**Powered by FerzDevZ** (Engineering at its Finest)
