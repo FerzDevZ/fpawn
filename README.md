@@ -1,45 +1,35 @@
-# fpawn v6.0 - FerzDevZ FPM Edition (Smart Finder)
+# fpawn v7.0 - FerzDevZ Autopilot Edition
 
-Selamat! Anda sekarang memegang tool CLI Pawn **paling cerdas** di dunia Linux. `fpawn` bukan sekadar compiler, tapi adalah asisten cerdas yang memahami kebutuhan proyek Anda.
+Ini adalah versi paling **OVERPOWER** dan **MENAKUTKAN** yang pernah diciptakan. `fpawn` v7.0 sekarang memiliki sistem kemudi otomatis (**Autopilot**) yang bisa memperbaiki kodingan Anda sendiri.
 
-## Fitur Unggulan v6.0 (FPM Edition)
+## Fitur Unggulan: Self-Healing Compilation
 
-### 1. FerzDevZ Smart Finder (`--ensure`)
-Pernah kesal karena error `cannot read from file` saat kompilasi? Cukup jalankan:
-```bash
-fpawn gamemode.pwn --ensure
-```
-`fpawn` akan otomatis memindai script Anda, mendeteksi include yang hilang, mencarinya di GitHub, dan memasangnya secara otomatis ke folder `include/` Anda.
+Bayangkan Anda mengkompilasi file, dan ternyata ada include yang lupa Anda download. Biasanya Anda akan mendapatkan error dan harus mencari file itu manual.
 
-### 2. Dual-Engine Architecture (Smart Sensing)
-`fpawn` secara otomatis mendeteksi apakah script Anda untuk **open.mp** atau **SAMP Legacy**:
-- Menggunakan engine **QAWNO** untuk open.mp (Native Linux).
-- Menggunakan engine **PAWNO** untuk SAMP Legacy (via Wine).
+**DI V7.0, SEMUANYA OTOMATIS:**
+1.  **Deteksi Instan**: Jika compiler bilang "file not found", `fpawn` langsung menangkap error tersebut.
+2.  **Smart Repair**: `fpawn` otomatis mencari file yang hilang di GitHub.
+3.  **Auto Re-Flight**: Jika file ditemukan, `fpawn` mendownloadnya dan **langsung mengulang kompilasi** secara otomatis.
 
-### 3. Watch Mode (`--watch`)
-Kompilasi otomatis setiap kali Anda menyimpan file. Tekan Ctrl+S, dan `fpawn` langsung bekerja di latar belakang.
-```bash
-fpawn gamemode.pwn --watch
-```
+**Hasilnya?** Anda mungkin hanya melihat satu perintah, tapi di baliknya `fpawn` telah bekerja keras membereskan segala library yang kurang sampai script Anda sukses jadi `.amx`.
 
-### 4. Plugin Master (`--plugin`)
-Pasang library populer dalam sekejap:
-```bash
-fpawn --plugin streamer
-fpawn --plugin mysql
-fpawn --plugin ysi
-fpawn --plugin sscanf
-```
+## Ringkasan Fitur Dewa
 
-## Ringkasan Perintah Penting
-
-| Perintah | Deskripsi |
+| Fitur | Deskripsi |
 | :--- | :--- |
-| `fpawn file.pwn --ensure` | Scan & pasang include yang hilang otomatis |
-| `fpawn file.pwn --watch` | Auto-recompile setiap save |
-| `fpawn --init` | Bangun struktur proyek FerzDevZ baru |
-| `fpawn --update` | Update standard library global |
-| `fpawn --decompile file.amx`| Bongkar file AMX jadi assembler |
+| **Autopilot** | Perbaikan include otomatis & retry kompilasi |
+| **Smart Sensing** | Deteksi otomatis open.mp vs SAMP Legacy |
+| **Watch Mode** | Live recompile setiap kali save (Ctrl+S) |
+| **Plugin Master** | Pasang library besar dalam 1 detik |
+| **FPM Finder** | Pencarian library ke seluruh database GitHub |
+
+## Cara Penggunaan (The Power of One Command)
+
+Anda hanya butuh satu perintah untuk semuanya:
+```bash
+fpawn gamemode.pwn
+```
+Jika ada yang kurang, `fpawn` akan mengurusnya. Jika engine salah, `fpawn` akan memperbaikinya.
 
 ---
 **Powered by FerzDevZ**
