@@ -1,29 +1,28 @@
-# fpawn v16.0 - FerzDevZ Intelligence & Mastery
+# fpawn v16.3 - FerzDevZ Master Integrity
 
-Mahakarya yang sesungguhnya. Versi 16.0 mengubah `fpawn` menjadi asisten cerdas berkekuatan tinggi yang siap membawa development Anda ke level profesional.
+Versi 16.3 adalah penyempurna total dari sistem library Anda. Kami memastikan tidak ada file korup yang menghentikan progres coding Anda.
 
-## Fitur Utama v16.0: Mastering the Workflow
+## Fitur Unggulan v16.3: Immutable Integrity
 
-### 1. Project Autopilot (`[6]`) - **PENTING**
-Jangan biarkan error kompilasi karena include hilang menghentikan Anda.
-- **Neural Scan**: `fpawn --scan` akan memindai seluruh project Anda.
-- **Auto-Fix**: Dia akan menemukan include yang hilang, menampilkannya, dan menawarkan pencarian otomatis ke GitHub untuk memasangnya.
+### 1. 404 Detect & Repair (`[6]`) - **VITAL**
+Terkadang download dari GitHub gagal dan menyimpan file kosong atau teks error (404).
+- **Auto-Health Check**: Jika `fpawn` mendeteksi file "404", dia akan otomatis menghapusnya.
+- **One-Key Repair**: Melalui menu **Project Autopilot**, Anda bisa memperbaiki seluruh struktur include yang rusak dalam hitungan detik.
 
-### 2. Surgical Ultra-Search (`[4]`)
-Kami memperbaiki mesin pencari total.
-- **Precision**: Hanya menampilkan **Repository GitHub** asli (bukan profile user).
-- **Project Insight**: Sekarang dilengkapi deskripsi project, statistik, dan link repo yang rapi.
-- **Direct Interactive**: Langsung pilih nomor index untuk melakukan **Auto-Cloning**.
+### 2. Robust open.mp Refresher (`[10]`)
+Kami telah memperbarui jalur standar library.
+- Sekarang, `fpawn` mendownload **Standard Library (stdlib)** asli dari repository resmi `openmultiplayer`.
+- Menjamin fungsi-fungsi terbaru open.mp selalu tersedia dan valid di project Anda.
 
-### 3. TUI V3 - High-Fidelity Design
-Tampilan dashboard baru dengan estetika futuristik dan navigasi yang sangat cepat.
+### 3. CLI Refresh (`--refresh`)
+Tidak ingin masuk ke menu? Cukup ketik `fpawn --refresh` dari terminal untuk mensinkronkan ulang seluruh library inti Anda ke versi paling segar.
 
 ---
 
-## Cara Update ke v16.0 (Mastery)
-Jalankan installer global untuk memperbarui seluruh sistem Anda dan memasang dependensi `jq`:
+## Cara Update ke v16.3
+Jalankan installer global untuk mengaktifkan engine proteksi integrity yang baru:
 ```bash
 ./install.sh
 ```
 
-**Powered by FerzDevZ** (The Apex of Pawn Engineering)
+**Powered by FerzDevZ** (The Absolute Golden Standard)

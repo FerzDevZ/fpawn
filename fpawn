@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 16.2 (Recovery Edition)
+# Version: 16.3 (Master Integrity Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -78,22 +78,32 @@ function project_scanner() {
     local SEARCH_PATHS=("include" "pawno/include" "dependencies" "$GLOBAL_INC")
     
     for INC in $INCS; do
-        [[ "$INC" =~ ^(a_samp|open.mp|core|float|string|file|time|datagram|console|a_mysql|streamer|sscanf2)$ ]] && continue
-        local FOUND=false
-        for PD in "${SEARCH_PATHS[@]}"; do [ -f "$PD/$INC.inc" ] && { FOUND=true; break; }; done
-        [ "$FOUND" = false ] && MISSING+=("$INC")
+        # We skip basic pawn language keywords but NOT ecosystem headers
+        [[ "$INC" =~ ^(core|float|string|file|time|datagram|console)$ ]] && continue
+        local FOUND=false; local CORRUPT=false
+        for PD in "${SEARCH_PATHS[@]}"; do 
+            if [ -f "$PD/$INC.inc" ]; then
+                FOUND=true
+                if head -n 1 "$PD/$INC.inc" | grep -q "404:"; then CORRUPT=true; fi
+                break
+            fi
+        done
+        
+        if [ "$FOUND" = false ]; then MISSING+=("$INC"); fi
+        if [ "$CORRUPT" = true ]; then POISONED+=("$INC"); fi
     done
 
-    if [ ${#MISSING[@]} -eq 0 ]; then
-        echo -e "${GREEN}[Verified]${NC} Ecosystem integrity 100%. No missing includes."
+    if [ ${#MISSING[@]} -eq 0 ] && [ ${#POISONED[@]} -eq 0 ]; then
+        echo -e "${GREEN}[Verified]${NC} Ecosystem integrity 100%. Architecture is healthy."
     else
-        echo -e "${ORANGE}[Warning]${NC} Detected ${#MISSING[@]} missing dependencies:"
-        for M in "${MISSING[@]}"; do echo -e " ❌ ${M}.inc"; done
+        [ ${#MISSING[@]} -gt 0 ] && echo -e "${ORANGE}[Warning]${NC} Missing dependencies: ${MISSING[*]}"
+        [ ${#POISONED[@]} -gt 0 ] && echo -e "${RED}[Alert]${NC} Corrupted (404) includes: ${POISONED[*]}"
         echo -e ""
-        read -p "Would you like fpawn to search and fix these? [y/N] " ANS
+        read -p "Would you like fpawn to repair the ecosystem? [y/N] " ANS
         if [[ "$ANS" == "y" ]]; then
-            for M in "${MISSING[@]}"; do
-                echo -e "${BLUE}[Fixer]${NC} Searching for $M..."
+            for M in "${MISSING[@]}" "${POISONED[@]}"; do
+                [ -f "include/$M.inc" ] && rm "include/$M.inc"
+                echo -e "${BLUE}[Repair]${NC} Restoring $M..."
                 smart_finder "$M.inc" || dynamic_search "$M"
             done
         fi
@@ -167,7 +177,7 @@ function dynamic_search() {
 function show_header() {
     clear
     echo -e " ${BLUE}┌──────────────────────────────────────────────────────────┐${NC}"
-    echo -e " ${BLUE}│${NC}${BOLD}${CYAN}      fpawn v16.2 - FerzDevZ Recovery Mastery             ${NC}${BLUE}│${NC}"
+    echo -e " ${BLUE}│${NC}${BOLD}${CYAN}      fpawn v16.3 - FerzDevZ Master Integrity             ${NC}${BLUE}│${NC}"
     echo -e " ${BLUE}└──────────────────────────────────────────────────────────┘${NC}"
     local CTX="${RED}NO CONTEXT${NC}"
     [ -f "pawn.json" ] && CTX="${GREEN}OPEN.MP ECOSYSTEM${NC}"
@@ -262,7 +272,7 @@ function self_update() {
     curl -L -s -o /tmp/fupd "$R"
     if [ $? -eq 0 ]; then
         local NV=$(grep "Version:" /tmp/fupd | head -n 1 | awk '{print $3}')
-        if [ "$NV" != "16.1" ] && [ -n "$NV" ]; then
+        if [ "$NV" != "16.3" ] && [ -n "$NV" ]; then
              echo -e "${YELLOW}[Alert]${NC} Master v$NV available. Elevating..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
         else echo -e "${GREEN}[Success]${NC} Mastery is up-to-date."; fi
     fi
@@ -282,14 +292,34 @@ function smart_finder() {
     local INC=$1; local RESP=$(curl -s "https://api.github.com/search/code?q=filename:$INC+extension:inc")
     local URL=$(echo "$RESP" | grep -o "\"html_url\": \"[^\"]*\"" | head -n 1 | sed 's/"html_url": //;s/"//g;s/github.com/raw.githubusercontent.com/;s/\/blob\//\//')
     if [ -n "$URL" ]; then 
-        local TD="include"; [ -d "pawno/include" ] && TD="pawno/include"; mkdir -p "$TD"; curl -L -s -o "$TD/$INC" "$URL" && return 0
+        local TD="include"; [ -d "pawno/include" ] && TD="pawno/include"; mkdir -p "$TD"
+        curl -L -s -o "$TD/$INC" "$URL"
+        if head -n 1 "$TD/$INC" | grep -q "404:"; then rm "$TD/$INC"; return 1; fi
+        return 0
     fi; return 1
 }
 
 function library_updater() {
     local TD="include"; [ -d "pawno/include" ] && TD="pawno/include"; mkdir -p "$TD"
+    echo -e "${BLUE}[Update]${NC} Refining Core Standard Libraries..."
+    
+    # 1. Fetch REAL open.mp stdlib (GitHub direct)
+    echo -e " - Synchronizing open.mp ecosystem..."
+    curl -L -s -o "$TD/open.mp.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/open.mp.inc"
+    # Secondary includes
+    curl -L -s -o "$TD/omp_version.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/omp_version.inc"
+    
+    # 2. Legacy Refresher
+    echo -e " - Synchronizing Legacy a_samp..."
     curl -L -s -o "$TD/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
-    echo -e "${GREEN}[Done]${NC} Core refreshed."
+    
+    # 3. Health Check
+    if head -n 1 "$TD/open.mp.inc" | grep -q "404:"; then
+        echo -e "${RED}[Error]${NC} Connection failure. Rollback engaged."
+        rm "$TD/open.mp.inc"
+    else
+        echo -e "${GREEN}[Done]${NC} Ecosystem successfully immunized."
+    fi
 }
 
 function server_runner() {
@@ -309,6 +339,7 @@ while [[ $# -gt 0 ]]; do
         --scan) project_scanner; exit 0 ;;
         --analyze) static_analyst; exit 0 ;;
         --update-self) self_update; exit 0 ;;
+        --refresh) library_updater; exit 0 ;;
         --plugin) plugin_manager "$2"; exit 0 ;;
         *.pwn) PASSED_ARGS+=( "$1" ); shift ;;
         *) shift ;;
