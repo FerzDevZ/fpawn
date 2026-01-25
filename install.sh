@@ -1,12 +1,10 @@
-#!/bin/bash
+echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v16.0 (Mastery Edition)..."
 
-# fpawn Global Installer
-# FerzDevZ Ultimate Suite
-
-INSTALL_DIR="$HOME/.ferzdevz/fpawn"
-BIN_DIR="$HOME/.local/bin"
-
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v13.0 Globallly..."
+# 0. Check Dependencies
+if ! command -v jq &> /dev/null; then
+    echo -e "\033[0;33m[Dependency]\033[0m 'jq' not found. Attempting to install..."
+    sudo apt-get update && sudo apt-get install -y jq || { echo -e "\033[0;31m[Error]\033[0m Please install 'jq' manually."; exit 1; }
+fi
 
 # 1. Prepare Directory
 mkdir -p "$INSTALL_DIR"

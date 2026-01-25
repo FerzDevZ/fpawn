@@ -1,30 +1,29 @@
-# fpawn v15.2 - FerzDevZ Actionable Search & Cloner
+# fpawn v16.0 - FerzDevZ Intelligence & Mastery
 
-Bukan sekadar pencarian, tapi eksekusi instan. Versi 15.2 menjadikan `fpawn` sebagai asisten yang proaktif dalam memenuhi kebutuhan library Anda.
+Mahakarya yang sesungguhnya. Versi 16.0 mengubah `fpawn` menjadi asisten cerdas berkekuatan tinggi yang siap membawa development Anda ke level profesional.
 
-## Fitur Baru: Interactive Auto-Cloner (`[4]`)
+## Fitur Utama v16.0: Mastering the Workflow
 
-Sekarang, saat Anda mencari plugin atau script, `fpawn` tidak hanya memberi Anda link yang membingungkan.
+### 1. Project Autopilot (`[6]`) - **PENTING**
+Jangan biarkan error kompilasi karena include hilang menghentikan Anda.
+- **Neural Scan**: `fpawn --scan` akan memindai seluruh project Anda.
+- **Auto-Fix**: Dia akan menemukan include yang hilang, menampilkannya, dan menawarkan pencarian otomatis ke GitHub untuk memasangnya.
 
-**Cara Pakai:**
-1.  Pilih menu **[4] Actionable Search**.
-2.  Ketik kata kunci yang Anda cari (contoh: `textdraw`).
-3.  `fpawn` akan menampilkan daftar **Repository GitHub** asli lengkap dengan nama dan deskripsinya.
-4.  **Action**: Cukup ketik nomor `[1-5]`, dan `fpawn` akan otomatis melakukan perintah `git clone` ke dalam folder project Anda.
+### 2. Surgical Ultra-Search (`[4]`)
+Kami memperbaiki mesin pencari total.
+- **Precision**: Hanya menampilkan **Repository GitHub** asli (bukan profile user).
+- **Project Insight**: Sekarang dilengkapi deskripsi project, statistik, dan link repo yang rapi.
+- **Direct Interactive**: Langsung pilih nomor index untuk melakukan **Auto-Cloning**.
 
-**Hasil**: Script atau plugin impian Anda langsung terinstall dalam hitungan detik tanpa perlu buka browser atau copy-paste URL manual.
-
-## Recap v15.2:
-- ✅ **Actionable Results**: Hasil pencarian berupa repository yang bisa dipilih.
-- ✅ **One-Key Installation**: Clone repository otomatis via nomor index.
-- ✅ **Clean Parsing**: Menghapus hasil sampah (hanya menampilkan repository asli).
+### 3. TUI V3 - High-Fidelity Design
+Tampilan dashboard baru dengan estetika futuristik dan navigasi yang sangat cepat.
 
 ---
 
-## Cara Update ke v15.2
-Jalankan installer global untuk memperbarui mesin pencari Anda:
+## Cara Update ke v16.0 (Mastery)
+Jalankan installer global untuk memperbarui seluruh sistem Anda dan memasang dependensi `jq`:
 ```bash
 ./install.sh
 ```
 
-**Powered by FerzDevZ** (Leveling Up Your Productivity)
+**Powered by FerzDevZ** (The Apex of Pawn Engineering)
