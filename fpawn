@@ -49,20 +49,42 @@ function install_server_binaries() {
     echo -e "${BLUE}[God Mode]${NC} Installing ${CYAN}${TYPE}${NC} server binaries..."
     
     if [ "$TYPE" = "omp" ]; then
-        # open.mp Linux x86
-        curl -L -s -o omp_server.tar.gz "https://github.com/openmultiplayer/open.mp/releases/download/v1.1.0.2612/open.mp-linux-x86.tar.gz"
+        echo -e "${YELLOW}[Info]${NC} Downloading open.mp Linux Server..."
+        curl -L -f -o omp_server.tar.gz "https://github.com/openmultiplayer/open.mp/releases/download/v1.1.0.2612/open.mp-linux-x86.tar.gz"
+        if [ $? -ne 0 ]; then echo -e "${RED}[Error]${NC} Download failed."; return 1; fi
+        
         tar -xzf omp_server.tar.gz
         mv open.mp omp-server 2>/dev/null || true
         chmod +x omp-server
         rm omp_server.tar.gz
         echo -e "${GREEN}[Success]${NC} open.mp server binary installed."
     else
-        # SAMP Legacy Linux
-        curl -L -s -o samp_server.tar.gz "http://files.sa-mp.com/samp037svr_R2-1.tar.gz"
+        echo -e "${YELLOW}[Info]${NC} Downloading SA-MP Legacy Linux Server..."
+        # Try primary URL
+        curl -L -f -o samp_server.tar.gz "http://files.sa-mp.com/samp037svr_R2-1.tar.gz"
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}[Warning]${NC} Primary URL failed. Trying mirror..."
+            curl -L -f -o samp_server.tar.gz "https://sa-mp.com/stuff/samp037svr_R2-1.tar.gz" # Fallback if possible
+        fi
+        
+        if [ ! -f "samp_server.tar.gz" ] || [ ! -s "samp_server.tar.gz" ]; then
+            echo -e "${RED}[Error]${NC} Failed to download SAMP server. Please check your internet or mirror."
+            return 1
+        fi
+
         tar -xzf samp_server.tar.gz
-        mv samp03svr/* ./
-        chmod +x samp03svr samp-npc
-        rm -rf samp03svr samp_server.tar.gz
+        if [ -d "samp03" ]; then
+            mv samp03/* ./
+            rmdir samp03
+        elif [ -d "samp03svr" ]; then
+            mv samp03svr/* ./
+            rmdir samp03svr
+        fi
+        
+        [ -f "samp03svr" ] && chmod +x samp03svr
+        [ -f "samp-npc" ] && chmod +x samp-npc
+        [ -f "announce" ] && chmod +x announce
+        rm samp_server.tar.gz
         echo -e "${GREEN}[Success]${NC} SA-MP Legacy server binaries installed."
     fi
 }
