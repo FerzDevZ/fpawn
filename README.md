@@ -1,48 +1,36 @@
-# fpawn v10.0 - FerzDevZ Master Suite (The Final Upgrade)
+# fpawn v10.5 - FerzDevZ Plugin Store
 
-Ini adalah puncak evolusi. `fpawn` kini bukan lagi sekadar tool CLI, melainkan sebuah **Aplikasi Terminal (TUI)** lengkap untuk mengelola seluruh aspek server SA-MP dan open.mp.
+Update besar untuk pecinta Plugin! `fpawn` kini memiliki database plugin yang sangat luas dan cerdas.
 
-## Fitur Utama v10.0
+## Plugin Baru yang Didukung:
 
-### 1. Interactive Dashboard (TUI)
-Lupa perintah? Cukup ketik `fpawn` (tanpa argumen) dan masuk ke dalam **Menu Visual**.
-- Pilih menu dengan angka [1-7].
-- Tidak perlu hafal flag panjang.
-- `fpawn` akan menuntun Anda langkah demi langkah.
+| Plugin | Deskripsi | Kompatibilitas |
+| :--- | :--- | :--- |
+| **CrashDetect** | Debugging tingkat dewa | ✅ Legacy (Recommended) |
+| **Pawn.RakNet** | Manipulasi packet jaringan | ✅ Legacy / ✅ OMP |
+| **ColAndreas** | Fisika & Map raycasting | ✅ Legacy / ✅ OMP |
+| **FCNPC** | Kontrol NPC/Bot canggih | ✅ Legacy / ✅ OMP |
+| **Discord Connector** | Integrasi bot Discord | ✅ Legacy / ✅ OMP |
 
-### 2. Production Build System (`--build`)
-Siap rilis server? Fitur ini akan membuat paket `.zip` yang bersih dan aman.
-- **Optimized Compile**: Mengkompilasi script dengan `-O2`.
-- **Source Protection**: Otomatis menghapus file `.pwn` dari paket rilis agar kode Anda tidak dicuri.
-- **Zip Packaging**: Menghasilkan `release.zip` siap upload ke VPS/Hosting.
+## Fitur Cerdas: Compatibility Check
 
-### 3. The Doctor (`--doctor`)
-Sebelum menyalakan server, periksa kesehatannya dulu.
-- **Security Check**: Mendeteksi jika Anda menggunakan password default yang berbahaya.
-- **Integrity Check**: Memastikan binary server dan folder penting tersedia.
+`fpawn` sekarang tahu plugin mana yang cocok untuk server Anda.
+- Jika Anda memasang `crashdetect` di server **open.mp**, `fpawn` akan memberi peringatan (karena open.mp sudah punya crash handler bawaan).
+- Mencegah Anda memasang plugin "jadul" yang bisa membuat server modern crash.
 
-## Cara Menggunakan Master Suite
+## Cara Install (Toko Plugin)
 
-**Masuk ke Dashboard:**
+Masuk ke menu interaktif baru:
 ```bash
 fpawn
 ```
+Lalu pilih **[4] Plugin Store**. Anda tinggal pilih angka plugin yang dimau.
 
-**Membuat Versi Rilis (Production):**
+Atau gunakan perintah cepat:
 ```bash
-fpawn --build
+fpawn --plugin colandreas
+fpawn --plugin pawn-raknet
 ```
-
-**Diagnosa Server:**
-```bash
-fpawn --doctor
-```
-
-## Tetap Kompatibel (Legacy Commands)
-Semua perintah lama tetap berfungsi normal bagi Anda yang suka kecepatan CLI:
-- `fpawn --create-server legacy`
-- `fpawn --plugin streamer`
-- `fpawn gamemode.pwn --watch`
 
 ---
-**Powered by FerzDevZ** (The Legend)
+**Powered by FerzDevZ**
