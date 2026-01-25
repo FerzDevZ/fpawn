@@ -55,7 +55,7 @@ install_pkg() {
     esac
 }
 
-PACKAGES=("curl" "unzip" "wine" "lib32z1" "inotify-tools" "jq" "git")
+PACKAGES=("curl" "unzip" "wine" "lib32z1" "inotify-tools" "jq" "git" "zip")
 
 for pkg in "${PACKAGES[@]}"; do
     if ! command -v $pkg &> /dev/null && [ "$pkg" != "lib32z1" ]; then
