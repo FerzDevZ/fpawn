@@ -1,36 +1,44 @@
-# fpawn v10.5 - FerzDevZ Plugin Store
+# fpawn v11.0 - FerzDevZ Cloud & AI Edition
 
-Update besar untuk pecinta Plugin! `fpawn` kini memiliki database plugin yang sangat luas dan cerdas.
+Tidak hanya mengelola, `fpawn` sekarang bisa **Menulis Kode** dan **Menyimpan Data ke Cloud**.
 
-## Plugin Baru yang Didukung:
+## Fitur Baru: Logic Generator (AI Template)
 
-| Plugin | Deskripsi | Kompatibilitas |
-| :--- | :--- | :--- |
-| **CrashDetect** | Debugging tingkat dewa | ✅ Legacy (Recommended) |
-| **Pawn.RakNet** | Manipulasi packet jaringan | ✅ Legacy / ✅ OMP |
-| **ColAndreas** | Fisika & Map raycasting | ✅ Legacy / ✅ OMP |
-| **FCNPC** | Kontrol NPC/Bot canggih | ✅ Legacy / ✅ OMP |
-| **Discord Connector** | Integrasi bot Discord | ✅ Legacy / ✅ OMP |
+Malas ngetik boilerplate command atau dialog? Biarkan `fpawn` yang menulisnya.
 
-## Fitur Cerdas: Compatibility Check
+**Cara Pakai:**
+```bash
+fpawn --gen cmd:heal
+```
+*Output:*
+```pawn
+CMD:heal(playerid, params[]) {
+    if (isnull(params)) return SendClientMessage(playerid, -1, "Usage: /heal [params]");
+    // TODO: Add logic for heal
+    return 1;
+}
+```
 
-`fpawn` sekarang tahu plugin mana yang cocok untuk server Anda.
-- Jika Anda memasang `crashdetect` di server **open.mp**, `fpawn` akan memberi peringatan (karena open.mp sudah punya crash handler bawaan).
-- Mencegah Anda memasang plugin "jadul" yang bisa membuat server modern crash.
+**Template Lainnya:**
+- `fpawn --gen dialog:register` -> Membuat struktur Dialog & Response.
+- `fpawn --gen mysql:loadplayer` -> Membuat callback loading data MySQL.
 
-## Cara Install (Toko Plugin)
+## Fitur Baru: Cloud Backup
 
-Masuk ke menu interaktif baru:
+Jangan pernah kehilangan data server lagi. Fitur ini akan otomatis mem-backup script dan config Anda ke GitHub (Private/Public Repo).
+
+**Cara Pakai:**
+```bash
+fpawn --backup
+```
+`fpawn` akan melakukan `git add`, `commit` otomatis, dan `push` ke branch main Anda dalam satu detik.
+
+## Master Dashboard v11
+Semua fitur di atas bisa diakses lewat menu visual:
 ```bash
 fpawn
 ```
-Lalu pilih **[4] Plugin Store**. Anda tinggal pilih angka plugin yang dimau.
-
-Atau gunakan perintah cepat:
-```bash
-fpawn --plugin colandreas
-fpawn --plugin pawn-raknet
-```
+Pilih **[5] Logic Generator** atau **[6] Cloud Backup**.
 
 ---
 **Powered by FerzDevZ**
