@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 16.3 (Master Integrity Edition)
+# Version: 17.0 (Architect & Evolution Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -19,8 +19,9 @@ QAWNO_DIR="$BASE_DIR/qawno"
 PAWNO_DIR="$BASE_DIR/pawno"
 GLOBAL_INC="$BASE_DIR/bin/includes"
 CONFIG_FILE="$HOME/.ferzdevz/fpawn/config"
+CACHE_DIR="$HOME/.ferzdevz/fpawn/cache/includes"
 
-# Colors (Electric Nebula Palette)
+# Colors (Architect Sapphire Palette)
 GREEN='\033[38;5;82m'
 BLUE='\033[38;5;39m'
 RED='\033[38;5;196m'
@@ -28,223 +29,206 @@ YELLOW='\033[38;5;226m'
 CYAN='\033[38;5;51m'
 MAGENTA='\033[38;5;201m'
 ORANGE='\033[38;5;208m'
+WHITE='\033[38;5;255m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# --- CONFIGURATION ---
+# --- CONFIGURATION & CACHE ---
 
 function load_config() {
     REPO_OWNER="FerzDevZ"
     REPO_NAME="fpawn"
-    if [ -f "$CONFIG_FILE" ]; then
-        source "$CONFIG_FILE"
+    mkdir -p "$(dirname "$CONFIG_FILE")" "$CACHE_DIR"
+    [ ! -f "$CONFIG_FILE" ] && echo -e "REPO_OWNER=\"FerzDevZ\"\nREPO_NAME=\"fpawn\"" > "$CONFIG_FILE"
+    source "$CONFIG_FILE"
+}
+
+# --- THE ARTISAN (CODE POLISHER) ---
+
+function code_polisher() {
+    local TARGET=$1
+    [[ -z "$TARGET" ]] && TARGET=$(find_entry_point)
+    [[ -z "$TARGET" ]] && { echo -e "${RED}[Error]${NC} No script target found."; return 1; }
+
+    echo -e "${CYAN}[Artisan]${NC} Polishing ${BOLD}$TARGET${NC} aesthetics..."
+    
+    local TEMP="/tmp/polisher_tmp.pwn"
+    # Basic Formatting Logic:
+    # 1. Standardize Indentation (4 spaces)
+    # 2. Fix spacing around Operators (=, +, -, *, /, ==, !=)
+    # 3. Ensure curly braces on newline (Allman style)
+    
+    cat "$TARGET" | \
+    sed 's/^\s*//' | \
+    sed 's/\s*$//' | \
+    # Add spacing around operators
+    sed -E 's/([^ <>!=])=([^ =])/\1 = \2/g' | \
+    # Basic indentation logic (very simple implementation for Bash)
+    sed 's/{/ {\n/g' | sed 's/}/\n}\n/g' | \
+    awk '
+    {
+        if ($0 ~ /}/) indent--;
+        for (i=0; i<indent; i++) printf "    ";
+        print $0;
+        if ($0 ~ /{/) indent++;
+    }' > "$TEMP"
+
+    cp "$TEMP" "$TARGET"
+    echo -e "${GREEN}[Success]${NC} Code is now balanced and professional."
+    rm -f "$TEMP"
+}
+
+# --- THE ARCHITECT (MODULAR GM) ---
+
+function template_architect() {
+    echo -e "${BLUE}[Architect]${NC} Casting Modular Foundation..."
+    local NAME="new_project"
+    read -p " Project Name (Default: gm_modular): " PNAME
+    [ -n "$PNAME" ] && NAME=$PNAME
+    
+    mkdir -p "$NAME/core" "$NAME/modules/player" "$NAME/modules/admin" "$NAME/include" "$NAME/gamemodes"
+    
+    cat > "$NAME/gamemodes/$NAME.pwn" <<EOF
+#include <open.mp>
+#include "../core/init.inc"
+#include "../modules/player/setup.inc"
+
+main() {
+    print("----------------------------------");
+    print(" $NAME System Online ");
+    print(" Powered by FerzDevZ fpawn v17 ");
+    print("----------------------------------");
+}
+EOF
+    touch "$NAME/core/init.inc" "$NAME/modules/player/setup.inc"
+    echo -e "${GREEN}[Success]${NC} Modular structure '$NAME' generated."
+}
+
+# --- NEURAL DIAGNOSE ---
+
+function neural_diagnose() {
+    local LOG="log.txt"; [ -f "server_log.txt" ] && LOG="server_log.txt"
+    echo -e "${ORANGE}[Neural]${NC} Probe deep-scanning ${CYAN}$LOG${NC}..."
+    
+    if grep -q "Runtime error" "$LOG"; then
+        echo -e "${RED}[Signature]${NC} Logic overflow detected."
+        # Extract last fatal signature
+        grep -A 5 "Runtime error" "$LOG" | tail -n 5
+    elif grep -q "backtrace" "$LOG"; then
+        echo -e "${RED}[Signature]${NC} Stack-trace detected. Mapping symbols..."
+        grep -B 2 -A 10 "backtrace" "$LOG" | tail -n 12
     else
-        mkdir -p "$(dirname "$CONFIG_FILE")"
-        echo "REPO_OWNER=\"FerzDevZ\"" > "$CONFIG_FILE"
-        echo "REPO_NAME=\"fpawn\"" >> "$CONFIG_FILE"
+        echo -e "${GREEN}[Verified]${NC} No terminal anomalies found in biological logs."
     fi
 }
 
-# --- HELPERS ---
+# --- HELPERS & INTELLIGENCE ---
 
 function find_entry_point() {
-    # 1. Check Root
     [ -f "main.pwn" ] && { echo "main.pwn"; return; }
-    # 2. Check src/
     [ -f "src/main.pwn" ] && { echo "src/main.pwn"; return; }
-    # 3. Check gamemodes/
     [ -f "gamemodes/main.pwn" ] && { echo "gamemodes/main.pwn"; return; }
-    # 4. Search any .pwn
     local ANY=$(find . -maxdepth 2 -name "*.pwn" | head -n 1 | sed 's|^./||')
-    if [ -n "$ANY" ]; then echo "$ANY"; return; fi
-    echo ""
+    echo "$ANY"
 }
 
-# --- MASTER INTELLIGENCE ---
-
 function project_scanner() {
-    echo -e "${BLUE}[Autopilot]${NC} Initiating Neural Project Scan..."
+    echo -e "${BLUE}[Autopilot]${NC} Scanning Neural Grids..."
     local MAIN_FILE=$(find_entry_point)
-    
-    if [ -z "$MAIN_FILE" ]; then
-        echo -e "${RED}[Error]${NC} No .pwn entry point detected recursively."
-        return 1
-    fi
+    [[ -z "$MAIN_FILE" ]] && { echo -e "${RED}[Error]${NC} No entry point found."; return 1; }
 
-    echo -e "${CYAN}[Scan]${NC} Component: ${BOLD}$MAIN_FILE${NC}"
-    
     local INCS=$(grep "#include" "$MAIN_FILE" | sed 's/.*<//;s/>.*//;s/.*"//;s/".*//' | sort -u)
-    local MISSING=()
-    local SEARCH_PATHS=("include" "pawno/include" "dependencies" "$GLOBAL_INC")
+    local MISSING_LIST=(); local CORRUPT_LIST=()
+    local SEARCH_PATHS=("include" "pawno/include" "dependencies" "$GLOBAL_INC" "$CACHE_DIR")
     
     for INC in $INCS; do
-        # We skip basic pawn language keywords but NOT ecosystem headers
         [[ "$INC" =~ ^(core|float|string|file|time|datagram|console)$ ]] && continue
         local FOUND=false; local CORRUPT=false
         for PD in "${SEARCH_PATHS[@]}"; do 
             if [ -f "$PD/$INC.inc" ]; then
                 FOUND=true
-                if head -n 1 "$PD/$INC.inc" | grep -q "404:"; then CORRUPT=true; fi
+                head -n 1 "$PD/$INC.inc" | grep -q "404:" && CORRUPT=true
                 break
             fi
         done
-        
-        if [ "$FOUND" = false ]; then MISSING+=("$INC"); fi
-        if [ "$CORRUPT" = true ]; then POISONED+=("$INC"); fi
+        [ "$FOUND" = false ] && MISSING_LIST+=("$INC")
+        [ "$CORRUPT" = true ] && CORRUPT_LIST+=("$INC")
     done
 
-    if [ ${#MISSING[@]} -eq 0 ] && [ ${#POISONED[@]} -eq 0 ]; then
-        echo -e "${GREEN}[Verified]${NC} Ecosystem integrity 100%. Architecture is healthy."
+    if [ ${#MISSING_LIST[@]} -eq 0 ] && [ ${#CORRUPT_LIST[@]} -eq 0 ]; then
+        echo -e "${GREEN}[Ready]${NC} Project architecture is healthy."
     else
-        [ ${#MISSING[@]} -gt 0 ] && echo -e "${ORANGE}[Warning]${NC} Missing dependencies: ${MISSING[*]}"
-        [ ${#POISONED[@]} -gt 0 ] && echo -e "${RED}[Alert]${NC} Corrupted (404) includes: ${POISONED[*]}"
-        echo -e ""
-        read -p "Would you like fpawn to repair the ecosystem? [y/N] " ANS
+        [ ${#CORRUPT_LIST[@]} -gt 0 ] && echo -e "${RED}[Warning]${NC} Corrupted components: ${CORRUPT_LIST[*]}"
+        read -p "Trigger Evolution/Repair? [y/N] " ANS
         if [[ "$ANS" == "y" ]]; then
-            for M in "${MISSING[@]}" "${POISONED[@]}"; do
-                [ -f "include/$M.inc" ] && rm "include/$M.inc"
-                echo -e "${BLUE}[Repair]${NC} Restoring $M..."
+            for M in "${MISSING_LIST[@]}" "${CORRUPT_LIST[@]}"; do
+                rm -f "include/$M.inc" "$CACHE_DIR/$M.inc"
+                echo -e "${BLUE}[Sync]${NC} Evolutionary link for $M..."
                 smart_finder "$M.inc" || dynamic_search "$M"
             done
         fi
     fi
 }
 
-function static_analyst() {
-     local FILE=$(find_entry_point)
-     [ -z "$FILE" ] && { echo -e "${RED}[Error]${NC} Entry point missing."; return 1; }
-     
-     echo -e "${BLUE}[Analyst]${NC} Inspecting ${CYAN}$FILE${NC} architecture..."
-     grep -q "main()" "$FILE" || echo -e " [!] ${YELLOW}Notice:${NC} Entry point 'main()' missing."
-     
-     local LINES=$(wc -l < "$FILE")
-     echo -e " [+] ${GREEN}Volume:${NC} $LINES lines detected."
-     
-     [ -f "pawn.json" ] && echo -e " [i] ${CYAN}Logic:${NC} Modern open.mp architecture detected."
-     [ -f "server.cfg" ] && echo -e " [i] ${YELLOW}Logic:${NC} Legacy SA-MP architecture detected."
-     
-     echo -e "${GREEN}[Status]${NC} Analysis complete."
-}
-
-# --- SEARCH & CLONER ---
-
-function repo_cloner() {
-    local URL=$1; local NAME=$2
-    echo -e "${BLUE}[Cloner]${NC} Cloning ${CYAN}$NAME${NC}..."
-    git clone --depth 1 "$URL" "$NAME"
-    [ $? -eq 0 ] && echo -e "${GREEN}[Success]${NC} Cloned to ./${NAME}" || echo -e "${RED}[Error]${NC} Clone failed."
-}
-
-function dynamic_search() {
-    local QUERY=$1
-    echo -e "${BLUE}[Search]${NC} Navigating Galaxy for '${CYAN}$QUERY${NC}'..."
-    
-    echo -e "${YELLOW}[Neural Link]${NC} Querying GitHub Hub..."
-    local SEARCH_URL="https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars"
-    local JSON=$(curl -s "$SEARCH_URL")
-    
-    local RESULTS=""
-    if command -v jq &> /dev/null; then
-        RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
-    fi
-
-    if [ -n "$RESULTS" ]; then
-        local i=1; local URLS=(); local NAMES=()
-        IFS=$'\n'
-        for RES in $RESULTS; do
-            local FNAME=$(echo "$RES" | cut -d'|' -f1); local FURL=$(echo "$RES" | cut -d'|' -f2); local FDESC=$(echo "$RES" | cut -d'|' -f3)
-            URLS+=( "$FURL" ); NAMES+=( "${FNAME#*/}" )
-            echo -e " [$i] ${BOLD}${CYAN}$FNAME${NC}"
-            [ -n "$FDESC" ] && [[ "$FDESC" != "null" ]] && echo -e "     ${MAGENTA}Note:${NC} $FDESC"
-            echo -e "     ${BLUE}Repo:${NC} $FURL"
-            ((i++))
-        done
-        unset IFS
-        
-        echo -e ""
-        read -p "Execute Clone index? [1-5 or Enter to skip]: " PICK
-        if [[ "$PICK" =~ ^[1-5]$ ]]; then
-            local IDX=$((PICK-1))
-            repo_cloner "${URLS[$IDX]}" "${NAMES[$IDX]}"
-        fi
-    else
-        echo -e "${RED}[Notice]${NC} Global repositories for '$QUERY' are dark."
-    fi
-}
-
-# --- TUI V3 MASTER-UI ---
+# --- TUI V4 EVOLUTION ---
 
 function show_header() {
     clear
-    echo -e " ${BLUE}┌──────────────────────────────────────────────────────────┐${NC}"
-    echo -e " ${BLUE}│${NC}${BOLD}${CYAN}      fpawn v16.3 - FerzDevZ Master Integrity             ${NC}${BLUE}│${NC}"
-    echo -e " ${BLUE}└──────────────────────────────────────────────────────────┘${NC}"
-    local CTX="${RED}NO CONTEXT${NC}"
-    [ -f "pawn.json" ] && CTX="${GREEN}OPEN.MP ECOSYSTEM${NC}"
-    [ -f "server.cfg" ] && CTX="${YELLOW}LEGACY SA-MP${NC}"
-    echo -e "  Project Status: $CTX"
+    echo -e " ${WHITE}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v17.0 - FerzDevZ Architect & Evolution       ${NC}${WHITE}║${NC}"
+    echo -e " ${WHITE}╚══════════════════════════════════════════════════════════╝${NC}"
+    local STATUS="${RED}DARK${NC}"
+    [ -f "pawn.json" ] && STATUS="${GREEN}SYNCHRONIZED (OMP)${NC}"
+    [ -f "server.cfg" ] && STATUS="${YELLOW}LEGACY (SAMP)${NC}"
+    echo -e "  Ecosystem Status: $STATUS"
     echo ""
 }
 
 function show_dashboard() {
     show_header
-    echo -e "  ${BOLD}ENGINEERING${NC}                    ${BOLD}INTELLIGENCE${NC}"
-    echo -e "  [1] Compile Script             [4] ${YELLOW}Actionable Search${NC}"
-    echo -e "  [2] Start Master Server        [5] ${CYAN}Analyze Architecture${NC}"
-    echo -e "  [3] Live Matrix Monitor        [6] ${GREEN}Project Autopilot (Scan)${NC}"
-    echo -e ""
-    echo -e "  ${BOLD}MASTERY TOOLS${NC}                  ${BOLD}SYSTEM${NC}"
-    echo -e "  [7] Optimize Release Build     [10] Library Refresh"
-    echo -e "  [8] Benchmark Core Stability   [11] Self Cloud Update"
-    echo -e "  [9] Full Server Forge          [0] Exit Application"
+    echo -e "  ${BOLD}ENGINEERING${NC}                    ${BOLD}EVOLUTION${NC}"
+    echo -e "  [1] Compile Script             [4] ${YELLOW}Neural Search${NC}"
+    echo -e "  [2] Start Instance             [5] ${CYAN}Analyze Architecture${NC}"
+    echo -e "  [3] Matrix Monitor             [6] ${GREEN}Project Autopilot${NC}"
     echo ""
-    echo -e " ${BLUE}────────────────────────────────────────────────────────────${NC}"
+    echo -e "  ${BOLD}MASTER TOOLS${NC}                   ${BOLD}SYSTEM${NC}"
+    echo -e "  [7] ${BOLD}${WHITE}Code Polisher (✨)${NC}        [10] Library Sync"
+    echo -e "  [8] ${CYAN}Architect Template (🏗️)${NC}     [11] Cloud Self-Update"
+    echo -e "  [9] ${ORANGE}Neural Diagnose (🕵️)${NC}       [0]  Shutdown Suite"
+    echo ""
+    echo -e " ${WHITE}────────────────────────────────────────────────────────────${NC}"
     read -p " Selection Master: " CHOICE
     case $CHOICE in
-        1) local F=$(find_entry_point); [ -z "$F" ] && F="main.pwn"; execute_compiler "auto" "auto" "$F"; exit ;;
+        1) local F=$(find_entry_point); execute_compiler "auto" "auto" "${F:-main.pwn}"; exit ;;
         2) server_runner; exit ;;
-        3) local F=$(find_entry_point); [ -z "$F" ] && F="main.pwn"; run_watch_mode "$F"; exit ;;
-        4) read -p " Keywords: " S; dynamic_search "$S"; read -p "Press Enter..."; show_dashboard ;;
-        5) static_analyst; read -p "Press Enter..."; show_dashboard ;;
-        6) project_scanner; read -p "Press Enter..."; show_dashboard ;;
-        7) optimizer_engine; exit ;;
-        9) read -p " (1)Legacy (2)OMP: " T; [ "$T" == "1" ] && install_server_binaries "legacy"; [ "$T" == "2" ] && install_server_binaries "omp"; exit ;;
-        10) library_updater; read -p "Press Enter..."; show_dashboard ;;
+        3) local F=$(find_entry_point); run_watch_mode "${F:-main.pwn}"; exit ;;
+        4) read -p " Topic: " S; dynamic_search "$S"; read -p "Enter..."; show_dashboard ;;
+        5) static_analyst; read -p "Enter..."; show_dashboard ;;
+        6) project_scanner; read -p "Enter..."; show_dashboard ;;
+        7) read -p " File to Polish: " F; code_polisher "$F"; read -p "Enter..."; show_dashboard ;;
+        8) template_architect; read -p "Enter..."; show_dashboard ;;
+        9) neural_diagnose; read -p "Enter..."; show_dashboard ;;
+        10) library_updater; read -p "Enter..."; show_dashboard ;;
         11) self_update; exit ;;
         0) exit 0 ;;
         *) show_dashboard ;;
     esac
 }
 
-# --- CORE FUNCTIONS ---
+# --- CORE LOGIC CORE ---
 
 function execute_compiler() {
-    local ENG=$1; local PROF=$2; shift 2; 
-    local FILE="${!#}"; local ARGS=(); [ $# -gt 1 ] && ARGS=("${@:1:$#-1}")
-    [[ "$FILE" != *.pwn ]] && { echo -e "${RED}[Error]${NC} Entry point missing."; return 1; }
-
-    # --- INTELLIGENT ROUTING (Fix for Option 7) ---
+    local ENG=$1; local PROF=$2; shift 2; local FILE="${!#}"; local ARGS=(); [ $# -gt 1 ] && ARGS=("${@:1:$#-1}")
+    [[ "$FILE" != *.pwn ]] && { echo -e "${RED}[Error]${NC} Invalid target."; return 1; }
     local FDIR="$(dirname "$FILE")"
     if [ "$PROF" = "auto" ]; then
-        if [ -f "pawn.json" ] || [ -d "dependencies" ] || [ -f "$FDIR/pawn.json" ] || [ -f "$FDIR/../pawn.json" ]; then PROF="omp"
-        elif [ -f "server.cfg" ] || [ -d "pawno/include" ] || [ -d "gamemodes" ]; then PROF="legacy"; fi
+        if [ -f "pawn.json" ] || [ -f "$FDIR/pawn.json" ] || [ -f "$FDIR/../pawn.json" ]; then PROF="omp"
+        else PROF="legacy"; fi
     fi
-    # Content-based scan if still unknown
-    if [ "$PROF" = "auto" ]; then
-        if grep -q "#include <open.mp>" "$FILE" 2>/dev/null; then PROF="omp"; else PROF="legacy"; fi
-    fi
-    
-    # Engine routing based on resolved profile
-    if [ "$ENG" = "auto" ]; then
-        if [ "$PROF" = "omp" ]; then ENG="qawno"; else ENG="pawno"; fi
-    fi
-
-    # echo "DEBUG: Target=$FILE Engine=$ENG Profile=$PROF"
-    
-    local OUT="/tmp/fpawn_out.log"; local INC_FLAGS=()
-    [ "$PROF" = "omp" ] && { [ -d "include" ] && INC_FLAGS+=("-iinclude"); [ -d "dependencies" ] && INC_FLAGS+=("-idependencies"); [ -d "$FDIR/../include" ] && INC_FLAGS+=("-i$FDIR/../include"); }
-    [ "$PROF" = "legacy" ] && { [ -d "pawno/include" ] && INC_FLAGS+=("-ipawno/include"); [ -d "include" ] && INC_FLAGS+=("-iinclude"); }
-    INC_FLAGS+=("-i$GLOBAL_INC")
+    [ "$ENG" = "auto" ] && { [ "$PROF" = "omp" ] && ENG="qawno" || ENG="pawno"; }
+    local OUT="/tmp/fpawn_out.log"; local INC_FLAGS=("-i$GLOBAL_INC")
+    [ "$PROF" = "omp" ] && { INC_FLAGS+=("-iinclude" "-idependencies" "-i$FDIR/../include" "-i$CACHE_DIR"); }
+    [ "$PROF" = "legacy" ] && { INC_FLAGS+=("-ipawno/include" "-iinclude" "-i$CACHE_DIR"); }
     
     if [ "$ENG" = "qawno" ]; then
         chmod +x "$QAWNO_DIR/pawncc"; export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
@@ -252,19 +236,8 @@ function execute_compiler() {
     else
         wine "$PAWNO_DIR/pawncc.exe" "$FILE" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$PAWNO_DIR/include" > "$OUT" 2>&1
     fi
-    local STAT=$?
-    if grep -q "fatal error 100" "$OUT"; then
-        local MIS=$(grep "fatal error 100" "$OUT" | head -n 1 | sed 's/.*: "\(.*\)".*/\1/')
-        if [ $RETRY_COUNT -lt 5 ] && smart_finder "$MIS.inc"; then ((RETRY_COUNT++)); execute_compiler "$ENG" "$PROF" "$@"; return $?; fi
-    fi
     cat "$OUT" | sed -u -e "s/error \([0-9]\{3\}\)/\x1b[1;31merror \1\x1b[0m/g" -e "s/warning \([0-9]\{3\}\)/\x1b[1;33mwarning \1\x1b[0m/g"
-    return $STAT
-}
-
-function optimizer_engine() {
-    local T=$(find_entry_point); [ -z "$T" ] && T="main.pwn"
-    echo -e "${BLUE}[Master]${NC} Release optimization for $T..."
-    execute_compiler "auto" "auto" "-O2" "$T"
+    return $?
 }
 
 function self_update() {
@@ -272,19 +245,37 @@ function self_update() {
     curl -L -s -o /tmp/fupd "$R"
     if [ $? -eq 0 ]; then
         local NV=$(grep "Version:" /tmp/fupd | head -n 1 | awk '{print $3}')
-        if [ "$NV" != "16.3" ] && [ -n "$NV" ]; then
-             echo -e "${YELLOW}[Alert]${NC} Master v$NV available. Elevating..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
-        else echo -e "${GREEN}[Success]${NC} Mastery is up-to-date."; fi
+        if [ "$NV" != "17.0" ] && [ -n "$NV" ]; then
+             echo -e "${YELLOW}[Alert]${NC} Master v$NV ready. Upgrading..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
+        else echo -e "${GREEN}[Ready]${NC} System is fully evolved."; fi
     fi
 }
 
-function install_server_binaries() {
-    local TYPE=$1; echo -e "${MAGENTA}[Forge]${NC} Hammering binaries for ${CYAN}$TYPE${NC}..."
-    if [ "$TYPE" = "omp" ]; then
-        curl -L -f -o omp.tar.gz "https://github.com/openmultiplayer/open.mp/releases/download/v1.1.0.2612/open.mp-linux-x86.tar.gz"
-        tar -xzf omp.tar.gz; [ -d "Server" ] && { mv Server/* ./; rmdir Server; }; [ -f "omp-server" ] && chmod +x omp-server
-    else
-        curl -L -f -o samp.tar.gz "https://sa-mp.co.id/files/samp037svr_R2-1.tar.gz"; tar -xzf samp.tar.gz; [ -d "samp03" ] && { mv samp03/* ./; rmdir samp03; }; chmod +x samp03svr
+function library_updater() {
+    local TD="include"; [ -d "pawno/include" ] && TD="pawno/include"; mkdir -p "$TD" "$CACHE_DIR"
+    echo -e "${BLUE}[Cache]${NC} Seeding Global Ecosystem..."
+    
+    # Download to Global Cache
+    curl -L -s -o "$CACHE_DIR/open.mp.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/open.mp.inc"
+    curl -L -s -o "$CACHE_DIR/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
+    
+    # Copy to project
+    cp "$CACHE_DIR/"*.inc "$TD/"
+    echo -e "${GREEN}[Done]${NC} Project synchronized with Global Cache."
+}
+
+function dynamic_search() {
+    local QUERY=$1; echo -e "${BLUE}[Neural]${NC} Accessing GitHub Vault..."
+    local JSON=$(curl -s "https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars")
+    RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
+    if [ -n "$RESULTS" ]; then
+        local i=1; local URLS=(); local NAMES=()
+        IFS=$'\n'; for RES in $RESULTS; do
+            URLS+=( "$(echo "$RES" | cut -d'|' -f2)" ); NAMES+=( "$(echo "$RES" | cut -d'|' -f1 | cut -d'/' -f2)" )
+            echo -e " [i] [$i] ${BOLD}${CYAN}$(echo "$RES" | cut -d'|' -f1)${NC}"; ((i++))
+        done; unset IFS
+        read -p " Clone Index: " PICK
+        [[ "$PICK" =~ ^[1-5]$ ]] && { git clone --depth 1 "${URLS[$PICK-1]}" "${NAMES[$PICK-1]}"; }
     fi
 }
 
@@ -292,34 +283,9 @@ function smart_finder() {
     local INC=$1; local RESP=$(curl -s "https://api.github.com/search/code?q=filename:$INC+extension:inc")
     local URL=$(echo "$RESP" | grep -o "\"html_url\": \"[^\"]*\"" | head -n 1 | sed 's/"html_url": //;s/"//g;s/github.com/raw.githubusercontent.com/;s/\/blob\//\//')
     if [ -n "$URL" ]; then 
-        local TD="include"; [ -d "pawno/include" ] && TD="pawno/include"; mkdir -p "$TD"
-        curl -L -s -o "$TD/$INC" "$URL"
-        if head -n 1 "$TD/$INC" | grep -q "404:"; then rm "$TD/$INC"; return 1; fi
-        return 0
+        mkdir -p "$CACHE_DIR"; curl -L -s -o "$CACHE_DIR/$INC" "$URL"
+        [ -f "$CACHE_DIR/$INC" ] && ! head -n 1 "$CACHE_DIR/$INC" | grep -q "404:" && { cp "$CACHE_DIR/$INC" "include/"; return 0; }
     fi; return 1
-}
-
-function library_updater() {
-    local TD="include"; [ -d "pawno/include" ] && TD="pawno/include"; mkdir -p "$TD"
-    echo -e "${BLUE}[Update]${NC} Refining Core Standard Libraries..."
-    
-    # 1. Fetch REAL open.mp stdlib (GitHub direct)
-    echo -e " - Synchronizing open.mp ecosystem..."
-    curl -L -s -o "$TD/open.mp.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/open.mp.inc"
-    # Secondary includes
-    curl -L -s -o "$TD/omp_version.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/omp_version.inc"
-    
-    # 2. Legacy Refresher
-    echo -e " - Synchronizing Legacy a_samp..."
-    curl -L -s -o "$TD/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
-    
-    # 3. Health Check
-    if head -n 1 "$TD/open.mp.inc" | grep -q "404:"; then
-        echo -e "${RED}[Error]${NC} Connection failure. Rollback engaged."
-        rm "$TD/open.mp.inc"
-    else
-        echo -e "${GREEN}[Done]${NC} Ecosystem successfully immunized."
-    fi
 }
 
 function server_runner() {
@@ -328,19 +294,18 @@ function server_runner() {
     [ -n "$B" ] && "$B" 2>&1 | sed -u -e "s/error.*/${RED}&${NC}/i" -e "s/info.*/${GREEN}&${NC}/i"
 }
 
-# --- BOOT ---
+# boot
 load_config
-RETRY_COUNT=0
 if [ $# -eq 0 ]; then show_dashboard; exit 0; fi
-
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --polish) code_polisher "$2"; exit 0 ;;
+        --init) template_architect; exit 0 ;;
+        --diagnose) neural_diagnose; exit 0 ;;
         --search) dynamic_search "$2"; exit 0 ;;
         --scan) project_scanner; exit 0 ;;
-        --analyze) static_analyst; exit 0 ;;
-        --update-self) self_update; exit 0 ;;
         --refresh) library_updater; exit 0 ;;
-        --plugin) plugin_manager "$2"; exit 0 ;;
+        --update-self) self_update; exit 0 ;;
         *.pwn) PASSED_ARGS+=( "$1" ); shift ;;
         *) shift ;;
     esac

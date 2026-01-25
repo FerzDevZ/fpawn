@@ -6,7 +6,10 @@
 INSTALL_DIR="$HOME/.ferzdevz/fpawn"
 BIN_DIR="$HOME/.local/bin"
 
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v16.3 (Master Integrity)..."
+echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v17.0 (Architect & Evolution)..."
+
+# 0. Prepare Directories
+mkdir -p "$INSTALL_DIR/cache/includes"
 
 # 0. Check Dependencies
 if ! command -v jq &> /dev/null; then
