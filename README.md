@@ -1,35 +1,30 @@
-# fpawn v14.0 - FerzDevZ Ultimate Edition
+# fpawn v15.0 - FerzDevZ Connected Ecosystem
 
-Inilah versi final dari mahakarya kita. `fpawn` kini bukan hanya tentang server lokal, tapi juga menghubungkan Anda ke Cloud dan Masa Depan.
+Selamat datang di era baru. `fpawn` kini terhubung langsung ke internet untuk memberikan kemudahan tanpa batas.
 
-## Fitur Baru: Automasi Cloud
+## Fitur Unggulan v15.0:
 
-### 1. CI/CD Generator (`[8]`)
-Ingin kode Anda otomatis dikompilasi setiap kali Anda upload ke GitHub?
-- Fitur ini membuat file `.github/workflows/build.yml`.
-- **Hasil**: GitHub Actions akan menjalankan `pawncc` di server mereka untuk mengecek apakah kode Anda error atau tidak.
-- Sangat berguna untuk kolaborasi tim.
+### 1. Dynamic Plugin Search (`[4]`)
+Lupa nama tepat sebuah plugin? Gunakan fitur **Search**.
+- Mendukung "Fuzzy Search" (Contoh: ketik `rak` untuk menemukan `pawn-raknet`).
+- Jika tidak ada di database lokal, `fpawn` akan otomatis mencari di repository GitHub global secara real-time.
 
-### 2. Library Manager (`[9]`)
-Jangan biarkan include Anda usang.
-- Satu klik untuk mendownload ulang `a_samp.inc` atau `open.mp.inc` versi terbaru dari source resminya.
-- Tidak perlu install ulang seluruh server.
+### 2. Self Updater (`[11]`)
+Ingin mendapatkan fitur terbaru `fpawn` tanpa perlu ngetik command manual lagi?
+- Cukup ketik `fpawn` dan pilih **[11] Self Update**.
+- Tool akan mengecek versi terbaru di GitHub `FerzDevZ/fpawn` dan langsung meng-update dirinya sendiri jika tersedia.
 
-## Rekapitulasi Ecosystem FerzDevZ
+## Recap Fitur v15.0:
+- ✅ **Online Connectivity**: Terhubung ke manifest GitHub.
+- ✅ **Fuzzy Search**: Pencarian plugin cerdas.
+- ✅ **One-Click Update**: Menjaga tool selalu dalam performa puncak.
 
-| Versi | Milestone Utama |
-| :--- | :--- |
-| **v9.0** | God Mode (Auto Installer Server) |
-| **v10.0** | Interactive TUI (Dashboard Menu) |
-| **v12.5** | Mega Plugin Store & Safe Optimizer |
-| **v13.0** | Global Installation (System Wide) |
-| **v14.0** | **Ultimate (CI/CD + Library Manager)** |
+---
 
-## Cara Update ke v14.0
-Timpa instalasi lama Anda dengan menjalankan installer lagi:
+## Cara Update Global ke v15.0
+Lakukan instalasi manual terakhir kalinya untuk mendaftarkan fitur updater:
 ```bash
 ./install.sh
 ```
 
----
 **Powered by FerzDevZ** (The Legend Continues...)
