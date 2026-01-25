@@ -2,11 +2,10 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 12.5 (Mega Store & Fixes)
+# Version: 14.0 (Ultimate Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 
 # --- DIRECTORIES ---
-# Resolve the true path of the script (handling symlinks)
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do
   DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
@@ -28,6 +27,54 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
+
+# --- CI/CD & UPDATER ---
+
+function generate_ci_workflow() {
+    echo -e "${BLUE}[CI]${NC} Generating GitHub Actions Workflow..."
+    mkdir -p .github/workflows
+    
+    cat > .github/workflows/build.yml <<EOF
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Pawn Compiler
+        uses: openmultiplayer/setup-pawn@v1
+        with:
+          version: '3.10.10'
+
+      - name: Compile Gamemode
+        run: pawncc main.pwn -iinclude -d3
+EOF
+    echo -e "${GREEN}[Success]${NC} Generated .github/workflows/build.yml"
+    echo -e "Push this to GitHub, and your code will be tested automatically!"
+}
+
+function library_updater() {
+    echo -e "${BLUE}[Update]${NC} Updating Core Libraries..."
+    local TINC="include"; [ -d "pawno/include" ] && TINC="pawno/include"
+    mkdir -p "$TINC"
+    
+    # a_samp (Standard)
+    echo -e " - Downloading a_samp..."
+    curl -L -s -o "$TINC/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
+    
+    # open.mp (if applicable)
+    if [ -f "pawn.json" ]; then
+        echo -e " - Downloading open.mp includes..."
+        # Simplified simulation: usually managed by sampctl, but we do manual grab
+        curl -L -s -o "$TINC/open.mp.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/open.mp.inc"
+    fi
+    
+    echo -e "${GREEN}[Success]${NC} Libraries are fresh."
+}
 
 # --- PLUGIN DATABASE (MEGA STORE) ---
 
@@ -108,18 +155,15 @@ function execute_compiler() {
     [ "$PROF" = "legacy" ] && { [ -d "pawno/include" ] && INC_FLAGS+=("-ipawno/include"); [ -d "include" ] && INC_FLAGS+=("-iinclude"); }
     INC_FLAGS+=("-i$GLOBAL_INC")
     
+    # Strict Order: pawncc <filename> [flags]
+    
     if [ "$ENG" = "qawno" ]; then
         chmod +x "$QAWNO_DIR/pawncc"; export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
-        # Construct plain string for eval
-        local CMD_STR="\"$QAWNO_DIR/pawncc\""
-        for arg in "${ARGS[@]}"; do CMD_STR+=" \"$arg\""; done
-        for inc in "${INC_FLAGS[@]}"; do CMD_STR+=" \"$inc\""; done
-        CMD_STR+=" \"-i$QAWNO_DIR/include\" \"-;+\" \"$FILE\""
-        
-        # echo "DEBUG EXEC: $CMD_STR"
-        eval $CMD_STR > "$OUT" 2>&1
+        # Filename FIRST
+        "$QAWNO_DIR/pawncc" "$FILE" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$QAWNO_DIR/include" "-;+" > "$OUT" 2>&1
     else
-        local CMD=("wine" "$PAWNO_DIR/pawncc.exe" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$PAWNO_DIR/include" "$FILE")
+        # Wine legacy (Filename FIRST)
+        local CMD=("wine" "$PAWNO_DIR/pawncc.exe" "$FILE" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$PAWNO_DIR/include")
         "${CMD[@]}" > "$OUT" 2>&1
     fi
     local STAT=$?
@@ -211,7 +255,13 @@ function install_server_binaries() {
     echo -e "${BLUE}[God Mode]${NC} Installing ${CYAN}${TYPE}${NC}..."
     if [ "$TYPE" = "omp" ]; then
         curl -L -f -o omp_server.tar.gz "https://github.com/openmultiplayer/open.mp/releases/download/v1.1.0.2612/open.mp-linux-x86.tar.gz"
-        tar -xzf omp_server.tar.gz; mv open.mp omp-server 2>/dev/null; chmod +x omp-server; project_init "omp"; rm -f omp_server.tar.gz
+        tar -xzf omp_server.tar.gz
+        
+        # Cleaning extract
+        if [ -d "Server" ]; then mv Server/* ./; [ -d "Server" ] && rmdir Server; fi
+        [ -f "omp-server" ] && chmod +x omp-server
+        
+        project_init "omp"; rm -f omp_server.tar.gz
     else
         curl -L -f -o samp_server.tar.gz "https://sa-mp.co.id/files/samp037svr_R2-1.tar.gz"
         [ $? -ne 0 ] && curl -L -f -o samp_server.tar.gz "http://files.sa-mp.com/samp037svr_R2-1.tar.gz"
@@ -261,7 +311,7 @@ function benchmark_mode() {
 function show_dashboard() {
     clear
     echo -e "${BLUE}======================================================${NC}"
-    echo -e "${BOLD}          fpawn v12.5 - FerzDevZ Mega Suite${NC}"
+    echo -e "${BOLD}          fpawn v14.0 - FerzDevZ Ultimate${NC}"
     echo -e "${BLUE}======================================================${NC}"
     
     local CTX="Unknown"
@@ -273,11 +323,13 @@ function show_dashboard() {
     echo -e " [1] Compile Script"
     echo -e " [2] Start Server"
     echo -e " [3] Live Monitor"
-    echo -e " [4] ${YELLOW}Plugin Store (New!)${NC}" 
+    echo -e " [4] Plugin Store"
     echo -e " [5] Optimize Build"
     echo -e " [6] Benchmark Server"
-    echo -e " [7] Cloud Backup"
-    echo -e " [8] Initialize New Project"
+    echo -e " [7] Cloud Backup (Git)"
+    echo -e " [8] CI/CD Gen (Github Actions)"
+    echo -e " [9] Update Core Libraries"
+    echo -e " [10] Create Full Server"
     echo -e " [0] Exit"
     echo -e ""
     read -p "Select: " CHOICE
@@ -289,7 +341,9 @@ function show_dashboard() {
         5) optimizer_engine "$2"; exit ;;
         6) benchmark_mode; exit ;;
         7) cloud_backup; exit ;;
-        8) read -p "1=Legacy 2=OMP: " T; [ "$T" == "1" ] && project_init "legacy"; [ "$T" == "2" ] && project_init "omp"; exit ;;
+        8) generate_ci_workflow; exit ;;
+        9) library_updater; exit ;;
+        10) read -p "1=Legacy 2=OMP: " T; [ "$T" == "1" ] && install_server_binaries "legacy"; [ "$T" == "2" ] && install_server_binaries "omp"; exit ;;
         0) exit 0 ;;
         *) show_dashboard ;;
     esac
@@ -306,6 +360,7 @@ while [[ $# -gt 0 ]]; do
         --optimize) optimizer_engine "$2"; exit 0 ;;
         --benchmark) benchmark_mode; exit 0 ;;
         --backup) cloud_backup; exit 0 ;;
+        --ci) generate_ci_workflow; exit 0 ;;
         --help) show_dashboard; exit 0 ;; 
         --init) project_init "$2"; exit 0 ;;
         --create-server) install_server_binaries "$2"; exit 0 ;;
@@ -338,7 +393,7 @@ if [ "$WATCH" = true ]; then
         clear; RETRY_COUNT=0; execute_compiler "$ENGINE" "$PROFILE" "${PASSED_ARGS[@]}"
     done
 else
-    echo -e "${BLUE}[fpawn v12.5]${NC} Initiating..."
+    echo -e "${BLUE}[fpawn v14.0]${NC} Initiating..."
     execute_compiler "$ENGINE" "$PROFILE" "${PASSED_ARGS[@]}"
     STATUS=$?
     [ $STATUS -eq 0 ] && echo -e "${GREEN}[OK]${NC} Success." || echo -e "${RED}[ERR]${NC} Failed."

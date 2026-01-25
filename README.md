@@ -1,29 +1,35 @@
-# fpawn v13.0 - FerzDevZ Total Integration
+# fpawn v14.0 - FerzDevZ Ultimate Edition
 
-Evolusi terakhir. `fpawn` kini menjadi aplikasi sistem yang sejati.
+Inilah versi final dari mahakarya kita. `fpawn` kini bukan hanya tentang server lokal, tapi juga menghubungkan Anda ke Cloud dan Masa Depan.
 
-## Fitur Baru: Global Installation
+## Fitur Baru: Automasi Cloud
 
-Anda tidak perlu menjalankan `fpawn` dari folder khusus lagi. Install sekali, pakai di mana saja.
+### 1. CI/CD Generator (`[8]`)
+Ingin kode Anda otomatis dikompilasi setiap kali Anda upload ke GitHub?
+- Fitur ini membuat file `.github/workflows/build.yml`.
+- **Hasil**: GitHub Actions akan menjalankan `pawncc` di server mereka untuk mengecek apakah kode Anda error atau tidak.
+- Sangat berguna untuk kolaborasi tim.
 
-**Cara Install:**
-1.  Buka terminal di folder project ini.
-2.  Jalankan installer:
-    ```bash
-    ./install.sh
-    ```
-3.  Restart terminal Anda.
+### 2. Library Manager (`[9]`)
+Jangan biarkan include Anda usang.
+- Satu klik untuk mendownload ulang `a_samp.inc` atau `open.mp.inc` versi terbaru dari source resminya.
+- Tidak perlu install ulang seluruh server.
 
-Sekarang, Anda bisa:
-- Buka terminal di folder `Documents` -> ketik `fpawn`.
-- Buka terminal di folder `Downloads` -> ketik `fpawn`.
-- `fpawn` selalu siap melayani Anda.
+## Rekapitulasi Ecosystem FerzDevZ
 
-## Lokasi Instalasi
-Semua file system `fpawn` tersimpan rapi & aman di:
-`~/.ferzdevz/fpawn/`
+| Versi | Milestone Utama |
+| :--- | :--- |
+| **v9.0** | God Mode (Auto Installer Server) |
+| **v10.0** | Interactive TUI (Dashboard Menu) |
+| **v12.5** | Mega Plugin Store & Safe Optimizer |
+| **v13.0** | Global Installation (System Wide) |
+| **v14.0** | **Ultimate (CI/CD + Library Manager)** |
 
-Ini memastikan tool Anda tidak akan terhapus tidak sengaja jika Anda membersihkan folder download.
+## Cara Update ke v14.0
+Timpa instalasi lama Anda dengan menjalankan installer lagi:
+```bash
+./install.sh
+```
 
 ---
-**Powered by FerzDevZ** (The Complete Ecosystem)
+**Powered by FerzDevZ** (The Legend Continues...)
