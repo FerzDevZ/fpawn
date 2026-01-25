@@ -1,37 +1,52 @@
-# fpawn v8.0 - FerzDevZ Workspace Edition
+# fpawn v9.0 - FerzDevZ God Mode Pack
 
-Versi **Workspace Edition** membawa `fpawn` ke level profesional yang lebih tinggi. Sekarang, `fpawn` mengerti perbedaan struktur folder antara project **SAMP Legacy** dan **open.mp**.
+Selamat datang di level **GOD MODE**. `fpawn` sekarang bukan lagi sekadar compiler, melainkan sebuah **Full-Stack Server Suite** untuk Linux.
 
-## Fitur Unggulan: Project Profiles
+## Apa itu God Mode?
 
-`fpawn` secara otomatis mengenali "Jenis Workspace" Anda tanpa perlu dikasih tahu:
+`fpawn` v9.0 mengelola seluruh siklus hidup server Anda:
+1.  **Download Server Engine**: Langsung ambil binary original SAMP atau open.mp.
+2.  **Plugin Manager (Full)**: Tidak cuma download `.inc`, tapi juga download `.so` (Linux DLL) secara otomatis.
+3.  **Integrated Runner**: Jalankan server langsung dari `fpawn` dengan output yang berwarna.
 
-### 1. Legacy Profile (Classic)
-- **Terdeteksi Jika**: Ada folder `pawno/` atau file `server.cfg`.
-- **Perilaku**: Otomatis memprioritaskan Engine **PAWNO** (Wine) dan mencari include di `./pawno/include`.
+## Fitur Unggulan v9.0
 
-### 2. OMP Profile (Modern)
-- **Terdeteksi Jika**: Ada folder `dependencies/` atau file `pawn.json`.
-- **Perilaku**: Otomatis memprioritaskan Engine **QAWNO** (Native Linux) dan mencari include di `./include` & `./dependencies`.
-
-## Cara Membuat Project Baru (Auto-Scaffold)
-
-Sekarang Anda bisa membangun pondasi server dalam sekejap:
-
-**Untuk SAMP Legacy (Gaya Lama):**
+### 1. Server Installer (`--create-server`)
+Install server SAMP atau open.mp lengkap dengan binary Linux aslinya:
 ```bash
-fpawn --init legacy
+fpawn --create-server legacy   # Install SAMP 0.3.7-R2 Linux
+fpawn --create-server omp      # Install open.mp Linux
 ```
 
-**Untuk open.mp (Gaya Modern):**
+### 2. Full Plugin Support (.so + .inc)
+Lupa download file `.so` untuk Linux? `fpawn` akan melakukannya untuk Anda:
 ```bash
-fpawn --init omp
+fpawn --plugin streamer
+```
+Ini akan otomatis mendownload `streamer.inc` ke folder `include/` DAN `streamer.so` ke folder `plugins/`.
+
+### 3. Integrated Runner (`--run`)
+Jalankan server Anda dengan satu perintah:
+```bash
+fpawn --run
+```
+`fpawn` akan otomatis mengatur `LD_LIBRARY_PATH`, memberikan izin eksekusi (`chmod +x`), dan mewarnai log server Anda agar mudah dibaca (Info: Hijau, Warning: Kuning, Error: Merah).
+
+### 4. Real-time Log Viewer (`--log`)
+Lihat apa yang terjadi di server Anda secara live:
+```bash
+fpawn --log
 ```
 
-## Keunggulan v8.0:
-- **Tersolir**: Library open.mp tidak akan tercampur dengan library legacy.
-- **Smart Priority**: Jika Anda menaruh `#include <a_samp>` di project OMP, `fpawn` cukup cerdas untuk tetap menggunakan engine modern namun mencari library yang kompatibel.
-- **Zero Config**: Pindah antar folder project yang beda versi? `fpawn` langsung beradaptasi secara instan.
+## Ringkasan Perintah Dewa
+
+| Perintah | Deskripsi |
+| :--- | :--- |
+| `fpawn --create-server [type]` | Install binary server Linux |
+| `fpawn --run` | Jalankan server secara profesional |
+| `fpawn --plugin streamer` | Install include & Linux binary (.so) |
+| `fpawn --log` | Intip log server secara live |
+| `fpawn script.pwn` | Kompilasi Autopilot (Zero-Config) |
 
 ---
 **Powered by FerzDevZ**
