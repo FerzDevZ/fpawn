@@ -1,0 +1,219 @@
+#!/bin/bash
+
+# fpawn Ultra - The Ultimate Pawn CLI for Linux
+# Created for: FerzDevZ
+# Version: 5.0 (Omnipotent Pack)
+
+# --- DIRECTORIES ---
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+QAWNO_DIR="$BASE_DIR/qawno"
+PAWNO_DIR="$BASE_DIR/pawno"
+GLOBAL_INC="$BASE_DIR/bin/includes"
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+# --- POWER FUNCTIONS ---
+
+function show_help() {
+    echo -e "${BLUE}${BOLD}fpawn FPM Edition${NC} - v6.0"
+    echo -e "Ultimate Suite by ${CYAN}${BOLD}FerzDevZ${NC}"
+    echo -e ""
+    echo -e "Usage: ${YELLOW}fpawn${NC} <file.pwn> [options]"
+    echo ""
+    echo -e "${BOLD}FPM (Package Manager):${NC}"
+    echo -e "  --ensure        ${YELLOW}Smart Finder${NC}: Auto-detect and download missing includes"
+    echo -e "  --plugin <name> Install popular libraries (streamer, mysql, etc.)"
+    echo ""
+    echo -e "${BOLD}Omnipotent Features:${NC}"
+    echo -e "  --watch         Watch Mode: Recompile automatically on save"
+    echo -e "  --decompile     Decompiler: Analyze .amx files"
+    echo ""
+    echo -e "${BOLD}Engine Selection:${NC}"
+    echo -e "  --omp / --legacy"
+    echo ""
+}
+
+function smart_finder() {
+    local INC_NAME=$1
+    echo -e "${BLUE}[FPM]${NC} Searching for ${CYAN}$INC_NAME${NC} on GitHub..."
+    
+    # Search GitHub for the include file
+    # This is a simplified search using the file name
+    local SEARCH_URL="https://api.github.com/search/code?q=filename:$INC_NAME+extension:inc"
+    local RESPONSE=$(curl -s "$SEARCH_URL")
+    
+    local DOWNLOAD_URL=$(echo "$RESPONSE" | jq -r '.items[0].html_url' | sed 's/github.com/raw.githubusercontent.com/' | sed 's/\/blob\//\//')
+    
+    if [ "$DOWNLOAD_URL" != "null" ] && [ -n "$DOWNLOAD_URL" ]; then
+        echo -e "${GREEN}[Found]${NC} Found at: ${DOWNLOAD_URL}"
+        echo -e "${YELLOW}[Info]${NC} Downloading to ./include/..."
+        mkdir -p include
+        curl -L -s -o "include/$INC_NAME" "$DOWNLOAD_URL"
+        return 0
+    else
+        echo -e "${RED}[Error]${NC} Could not find $INC_NAME on GitHub."
+        return 1
+    fi
+}
+
+function ensure_includes() {
+    local FILE=$1
+    echo -e "${BLUE}[FPM]${NC} Scanning ${CYAN}$FILE${NC} for missing dependencies..."
+    
+    # Extract includes and check if they exist
+    local INCLUDES=$(grep -oP '#include\s+<\K[^>]+(?=>)' "$FILE")
+    
+    for inc in $INCLUDES; do
+        if [[ "$inc" == "a_samp" || "$inc" == "open.mp" || "$inc" == "core" || "$inc" == "float" ]]; then continue; fi
+        
+        # Check local paths
+        local FOUND=false
+        [ -f "include/$inc.inc" ] && FOUND=true
+        [ -f "pawno/include/$inc.inc" ] && FOUND=true
+        [ -f "$GLOBAL_INC/$inc.inc" ] && FOUND=true
+        [ -f "$QAWNO_DIR/include/$inc.inc" ] && FOUND=true
+        
+        if [ "$FOUND" = false ]; then
+            echo -e "${YELLOW}[Missing]${NC} $inc.inc not found locally."
+            smart_finder "$inc.inc"
+        fi
+    done
+}
+
+function plugin_manager() {
+    local NAME=$1
+    echo -e "${BLUE}[fpawn]${NC} Plugin Master: Setting up ${CYAN}$NAME${NC}..."
+    mkdir -p include
+    
+    case $NAME in
+        streamer) curl -L -s -o "include/streamer.inc" "https://raw.githubusercontent.com/samp-incognito/samp-streamer-plugin/master/include/streamer.inc" ;;
+        mysql)    curl -L -s -o "include/a_mysql.inc" "https://raw.githubusercontent.com/pBlueG/SA-MP-MySQL/master/a_mysql.inc" ;;
+        sscanf)   curl -L -s -o "include/sscanf2.inc" "https://raw.githubusercontent.com/Y-Less/sscanf/master/sscanf2.inc" ;;
+        ysi)      echo -e "${YELLOW}[Info]${NC} YSI update via git..."; git clone --depth 1 https://github.com/pawn-lang/YSI-Includes.git include/YSI ;;
+        *)        echo -e "${RED}[Error]${NC} Unknown plugin: $NAME"; return 1 ;;
+    esac
+    echo -e "${GREEN}[Success]${NC} Plugin headers added."
+}
+
+function decompile() {
+    local FILE=$1
+    echo -e "${BLUE}[fpawn]${NC} Decompiling ${CYAN}$FILE${NC}..."
+    "$QAWNO_DIR/pawndisasm" "$FILE"
+}
+
+# --- MAIN LOGIC ---
+
+if [ $# -eq 0 ]; then
+    show_help
+    exit 1
+fi
+
+ENGINE="auto"
+TARGET_FILE=""
+PASSED_ARGS=()
+INCLUDE_FLAGS=()
+WATCH=false
+ENSURE=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help) show_help; exit 0 ;;
+        --init) 
+            mkdir -p gamemodes filterscripts include scriptfiles/logs
+            echo -e "{\"dependencies\": {}}" > pawn.json
+            echo -e "${GREEN}[Success]${NC} Project initialized with FerzDevZ FPM."
+            exit 0 ;;
+        --update) 
+            mkdir -p "$GLOBAL_INC"
+            curl -L -s -o "$GLOBAL_INC/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
+            echo -e "${GREEN}[Update]${NC} Global standard library updated."
+            exit 0 ;;
+        --plugin) plugin_manager "$2"; shift 2; exit 0 ;;
+        --decompile) decompile "$2"; shift 2; exit 0 ;;
+        --ensure) ENSURE=true; shift ;;
+        --watch) WATCH=true; shift ;;
+        --omp) ENGINE="qawno"; shift ;;
+        --legacy) ENGINE="pawno"; shift ;;
+        --debug) PASSED_ARGS+=("-d3"); shift ;;
+        --opt) PASSED_ARGS+=("-O2"); shift ;;
+        -i*) INCLUDE_FLAGS+=("$1"); shift ;;
+        *.pwn) TARGET_FILE="$1"; PASSED_ARGS+=("$1"); shift ;;
+        *) PASSED_ARGS+=("$1"); shift ;;
+    esac
+done
+
+if [ "$ENSURE" = true ] && [ -f "$TARGET_FILE" ]; then
+    ensure_includes "$TARGET_FILE"
+fi
+
+# --- EXECUTION ENGINE ---
+
+function run_compile() {
+    local DETECTED_ENGINE=$ENGINE
+    
+    if [ "$DETECTED_ENGINE" = "auto" ]; then
+        if grep -q "#include <open.mp>" "$TARGET_FILE"; then DETECTED_ENGINE="qawno"
+        elif grep -q "#include <a_samp>" "$TARGET_FILE"; then DETECTED_ENGINE="pawno"
+        else DETECTED_ENGINE="qawno"; fi
+    fi
+
+    export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
+    
+    local FINAL_INCLUDES=("${INCLUDE_FLAGS[@]}")
+    [ -d "$(pwd)/include" ] && FINAL_INCLUDES+=("-i$(pwd)/include")
+    [ -d "$(pwd)/pawno/include" ] && FINAL_INCLUDES+=("-i$(pwd)/pawno/include")
+    FINAL_INCLUDES+=("-i$GLOBAL_INC")
+
+    function color_filter() {
+        sed -u \
+        -e "s/error \([0-9]\{3\}\)/\x1b[1;31merror \1\x1b[0m/g" \
+        -e "s/warning \([0-9]\{3\}\)/\x1b[1;33mwarning \1\x1b[0m/g" \
+        -e "s/(\([0-9]\{1,\}\))/\x1b[1;36m(\1)\x1b[0m/g"
+    }
+
+    if [ "$DETECTED_ENGINE" = "qawno" ]; then
+        "$QAWNO_DIR/pawncc" "${PASSED_ARGS[@]}" "${FINAL_INCLUDES[@]}" "-i$QAWNO_DIR/include" "-;+" 2>&1 | color_filter
+    else
+        wine "$PAWNO_DIR/pawncc.exe" "${PASSED_ARGS[@]}" "${FINAL_INCLUDES[@]}" "-i$PAWNO_DIR/include" 2>&1 | color_filter
+    fi
+    
+    return ${PIPESTATUS[0]}
+}
+
+# --- WATCH MODE OR NORMAL ---
+
+if [ "$WATCH" = true ]; then
+    if ! command -v inotifywait &> /dev/null; then
+        echo -e "${RED}[Error]${NC} 'inotify-tools' is required for watch mode."
+        echo -e "Please run ${YELLOW}sudo setup.sh${NC} to install it."
+        exit 1
+    fi
+    
+    echo -e "${MAGENTA}[Watch]${NC} Monitoring ${CYAN}$TARGET_FILE${NC} for changes..."
+    run_compile
+    
+    while inotifywait -e modify "$TARGET_FILE" 2>/dev/null; do
+        clear
+        echo -e "${MAGENTA}[Watch]${NC} Change detected. Recompiling..."
+        run_compile
+        echo -e "${MAGENTA}[Watch]${NC} Waiting for changes (Ctrl+C to stop)..."
+    done
+else
+    echo -e "${BLUE}[fpawn Ultra]${NC} Initiating ${CYAN}FerzDevZ${NC} Engine..."
+    run_compile
+    STATUS=$?
+    if [ $STATUS -eq 0 ]; then
+        echo -e "${GREEN}[OK]${NC} Compilation successful."
+    else
+        echo -e "${RED}[ERR]${NC} Compilation failed."
+    fi
+    exit $STATUS
+fi
