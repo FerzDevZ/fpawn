@@ -6,7 +6,7 @@
 INSTALL_DIR="$HOME/.ferzdevz/fpawn"
 BIN_DIR="$HOME/.local/bin"
 
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v16.0 (Mastery Edition)..."
+echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v16.2 (Recovery Mastery)..."
 
 # 0. Check Dependencies
 if ! command -v jq &> /dev/null; then

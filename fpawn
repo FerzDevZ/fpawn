@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 16.1 (Fine-tuned Intelligence)
+# Version: 16.2 (Recovery Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -167,7 +167,7 @@ function dynamic_search() {
 function show_header() {
     clear
     echo -e " ${BLUE}┌──────────────────────────────────────────────────────────┐${NC}"
-    echo -e " ${BLUE}│${NC}${BOLD}${CYAN}      fpawn v16.1 - FerzDevZ Fine-tuned Intelligence      ${NC}${BLUE}│${NC}"
+    echo -e " ${BLUE}│${NC}${BOLD}${CYAN}      fpawn v16.2 - FerzDevZ Recovery Mastery             ${NC}${BLUE}│${NC}"
     echo -e " ${BLUE}└──────────────────────────────────────────────────────────┘${NC}"
     local CTX="${RED}NO CONTEXT${NC}"
     [ -f "pawn.json" ] && CTX="${GREEN}OPEN.MP ECOSYSTEM${NC}"
@@ -212,12 +212,31 @@ function execute_compiler() {
     local ENG=$1; local PROF=$2; shift 2; 
     local FILE="${!#}"; local ARGS=(); [ $# -gt 1 ] && ARGS=("${@:1:$#-1}")
     [[ "$FILE" != *.pwn ]] && { echo -e "${RED}[Error]${NC} Entry point missing."; return 1; }
+
+    # --- INTELLIGENT ROUTING (Fix for Option 7) ---
+    local FDIR="$(dirname "$FILE")"
+    if [ "$PROF" = "auto" ]; then
+        if [ -f "pawn.json" ] || [ -d "dependencies" ] || [ -f "$FDIR/pawn.json" ] || [ -f "$FDIR/../pawn.json" ]; then PROF="omp"
+        elif [ -f "server.cfg" ] || [ -d "pawno/include" ] || [ -d "gamemodes" ]; then PROF="legacy"; fi
+    fi
+    # Content-based scan if still unknown
+    if [ "$PROF" = "auto" ]; then
+        if grep -q "#include <open.mp>" "$FILE" 2>/dev/null; then PROF="omp"; else PROF="legacy"; fi
+    fi
+    
+    # Engine routing based on resolved profile
+    if [ "$ENG" = "auto" ]; then
+        if [ "$PROF" = "omp" ]; then ENG="qawno"; else ENG="pawno"; fi
+    fi
+
+    # echo "DEBUG: Target=$FILE Engine=$ENG Profile=$PROF"
+    
     local OUT="/tmp/fpawn_out.log"; local INC_FLAGS=()
-    [ "$PROF" = "omp" ] && { [ -d "include" ] && INC_FLAGS+=("-iinclude"); [ -d "dependencies" ] && INC_FLAGS+=("-idependencies"); }
+    [ "$PROF" = "omp" ] && { [ -d "include" ] && INC_FLAGS+=("-iinclude"); [ -d "dependencies" ] && INC_FLAGS+=("-idependencies"); [ -d "$FDIR/../include" ] && INC_FLAGS+=("-i$FDIR/../include"); }
     [ "$PROF" = "legacy" ] && { [ -d "pawno/include" ] && INC_FLAGS+=("-ipawno/include"); [ -d "include" ] && INC_FLAGS+=("-iinclude"); }
     INC_FLAGS+=("-i$GLOBAL_INC")
     
-    if [ "$ENG" = "qawno" ] || { [ "$ENG" = "auto" ] && [ "$PROF" = "omp" ]; }; then
+    if [ "$ENG" = "qawno" ]; then
         chmod +x "$QAWNO_DIR/pawncc"; export LD_LIBRARY_PATH="$QAWNO_DIR:$LD_LIBRARY_PATH"
         "$QAWNO_DIR/pawncc" "$FILE" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$QAWNO_DIR/include" "-;+" > "$OUT" 2>&1
     else
