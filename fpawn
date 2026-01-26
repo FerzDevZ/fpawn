@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 18.3 (Auto-Ignition Edition)
+# Version: 18.4 (Neural Search Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -62,7 +62,7 @@ function msg() {
     local ID=$1
     if [ "$LANG" == "id" ]; then
         case $ID in
-            welcome) echo "Selamat Datang di fpawn v18.2" ;;
+            welcome) echo "Selamat Datang di fpawn v18.4" ;;
             status) echo "Status Ekosistem" ;;
             menu_1) echo "Kompilasi Script" ;;
             menu_2) echo "Jalankan Instance" ;;
@@ -84,7 +84,7 @@ function msg() {
         esac
     else
         case $ID in
-            welcome) echo "Welcome to fpawn v18.2" ;;
+            welcome) echo "Welcome to fpawn v18.4" ;;
             status) echo "Ecosystem Status" ;;
             menu_1) echo "Compile Target" ;;
             menu_2) echo "Start Instance" ;;
@@ -294,7 +294,7 @@ function project_scanner() {
 function show_header() {
     clear
     echo -e " ${WHITE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v18.3 - FerzDevZ Auto-Ignition Edition         ${NC}${WHITE}║${NC}"
+    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v18.4 - FerzDevZ Neural Search Edition         ${NC}${WHITE}║${NC}"
     echo -e " ${WHITE}╚══════════════════════════════════════════════════════════╝${NC}"
     local STATUS="${RED}DARK${NC}"
     [ -f "pawn.json" ] && STATUS="${GREEN}SYNCHRONIZED (OMP)${NC}"
@@ -376,32 +376,70 @@ function repo_cloner() {
 }
 
 function dynamic_search() {
-    local QUERY=$1; echo -e "${BLUE}[Neural]${NC} Accessing GitHub Vault..."
-    local JSON=$(curl -s "https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars")
-    local RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
+    local QUERY=$1; echo -e "${BLUE}[Neural]${NC} Accessing GitHub Vault with Intelligent Ranking..."
+    local JSON=$(curl -s "https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars&per_page=50")
+    
+    # Curated marketplace repos to filter out
+    local CURATED=("openmultiplayer/open.mp-stdlib" "samp-incognito/samp-streamer-plugin" "pBlueG/SA-MP-MySQL" "Y-Less/sscanf")
+    
+    # Parse and score
+    local SCORED=""
+    while IFS= read -r ITEM; do
+        local FNAME=$(echo "$ITEM" | jq -r '.full_name')
+        local FURL=$(echo "$ITEM" | jq -r '.html_url')
+        local FDESC=$(echo "$ITEM" | jq -r '.description // ""')
+        local STARS=$(echo "$ITEM" | jq -r '.stargazers_count // 0')
+        
+        # Skip curated duplicates
+        local SKIP=false
+        for CUR in "${CURATED[@]}"; do [[ "$FNAME" == "$CUR" ]] && SKIP=true && break; done
+        $SKIP && continue
+        
+        # Calculate score
+        local SCORE=0
+        local RNAME="${FNAME#*/}"
+        [[ "${RNAME,,}" == "${QUERY,,}" ]] && SCORE=$((SCORE + 20))  # Exact match
+        [[ "${RNAME,,}" == *"${QUERY,,}"* ]] && SCORE=$((SCORE + 10))  # Name contains
+        [[ "${FDESC,,}" == *"${QUERY,,}"* ]] && SCORE=$((SCORE + 3))   # Desc contains
+        SCORE=$((SCORE + STARS / 100))  # Stars bonus
+        
+        SCORED+="${SCORE}|${FNAME}|${FURL}|${FDESC}|${RNAME}\n"
+    done < <(echo "$JSON" | jq -c '.items[]')
+    
+    # Sort by score and take top 10
+    local RESULTS=$(echo -e "$SCORED" | sort -t'|' -k1 -rn | head -n 10)
     
     if [ -z "$RESULTS" ]; then
-        echo -e "${RED}[Notice]${NC} No repositories found in the Pawn galaxy for '${CYAN}$QUERY${NC}'."
+        echo -e "${RED}[Notice]${NC} No repositories found for '${CYAN}$QUERY${NC}'."
         return
     fi
-
+    
     local i=1; local URLS=(); local NAMES=()
     IFS=$'\n'; for RES in $RESULTS; do
-        local FNAME=$(echo "$RES" | cut -d'|' -f1); local FURL=$(echo "$RES" | cut -d'|' -f2); local FDESC=$(echo "$RES" | cut -d'|' -f3)
-        URLS+=( "$FURL" ); NAMES+=( "${FNAME#*/}" )
-        echo -e " [$i] ${BOLD}${CYAN}$FNAME${NC}"
+        local SCORE=$(echo "$RES" | cut -d'|' -f1)
+        local FNAME=$(echo "$RES" | cut -d'|' -f2)
+        local FURL=$(echo "$RES" | cut -d'|' -f3)
+        local FDESC=$(echo "$RES" | cut -d'|' -f4)
+        local RNAME=$(echo "$RES" | cut -d'|' -f5)
+        
+        URLS+=( "$FURL" ); NAMES+=( "$RNAME" )
+        
+        # Relevance indicator
+        local REL="⭐"; [[ $SCORE -gt 15 ]] && REL="⭐⭐"; [[ $SCORE -gt 25 ]] && REL="⭐⭐⭐"
+        
+        echo -e " [$i] ${REL} ${BOLD}${CYAN}$FNAME${NC}"
         [ -n "$FDESC" ] && [[ "$FDESC" != "null" ]] && echo -e "     ${MAGENTA}Note:${NC} $FDESC"
-        echo -e "     ${BLUE}Repo:${NC} $FURL"
+        echo -e "     ${BLUE}Link:${NC} $FURL"
         ((i++))
     done; unset IFS
-    read -p " Index to Clone [1-5]: " PICK
-    [[ "$PICK" =~ ^[1-5]$ ]] && repo_cloner "${URLS[$PICK-1]}" "${NAMES[$PICK-1]}"
+    read -p " Index to Clone [1-10]: " PICK
+    [[ "$PICK" =~ ^[1-9]$|^10$ ]] && repo_cloner "${URLS[$PICK-1]}" "${NAMES[$PICK-1]}"
 }
 
 function self_update() {
     local R="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/fpawn"
     curl -L -s -o /tmp/fupd "$R"; local NV=$(grep "Version:" /tmp/fupd | head -n 1 | awk '{print $3}')
-    if [ "$NV" != "18.3" ] && [ -n "$NV" ]; then
+    if [ "$NV" != "18.4" ] && [ -n "$NV" ]; then
          echo -e "${YELLOW}[Alert]${NC} High-priority patch v$NV detected. Upgrading..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
     else echo -e "${GREEN}[Ready]${NC} Precision standard achieved."; fi
 }
