@@ -6,7 +6,7 @@
 INSTALL_DIR="$HOME/.ferzdevz/fpawn"
 BIN_DIR="$HOME/.local/bin"
 
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v18.4 (Neural Search Edition)..."
+echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v19.0 (Plugin Ecosystem Edition)..."
 
 # 0. Prepare Directories
 mkdir -p "$INSTALL_DIR/cache/includes"
@@ -26,7 +26,9 @@ echo -e "\033[0;36m[Copy]\033[0m Migrating engines and libraries..."
 cp -r qawno "$INSTALL_DIR/"
 cp -r pawno "$INSTALL_DIR/"
 cp -r bin "$INSTALL_DIR/"
+cp -r lib "$INSTALL_DIR/"
 cp fpawn "$INSTALL_DIR/"
+cp plugin_db.sh "$INSTALL_DIR/"
 
 # 3. Validating Permissions
 chmod +x "$INSTALL_DIR/fpawn"
