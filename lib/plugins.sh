@@ -10,19 +10,40 @@ fi
 # === PLUGIN MANAGER TUI ===
 
 function plugins_manager_tui() {
-    echo -e "${LBLUE}[Plugin Manager]${NC} Preparing interactive catalog..."
+    echo -e "${LBLUE}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${LBLUE}║${NC}${BOLD}${CYAN}          fpawn Plugin Manager - 80+ Plugins Available     ${NC}${LBLUE}║${NC}"
+    echo -e "${LBLUE}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${YELLOW}[Notice]${NC} Full Plugin Manager TUI coming in v19.1"
-    echo -e "${BLUE}[Info]${NC} Use CLI for now: ${CYAN}fpawn --plugin install <name>${NC}"
+    
+    # Get total count
+    local TOTAL=${#PLUGIN_DATABASE[@]}
+    
+    echo -e "${BOLD}📦 Database Stats:${NC} $TOTAL plugins across 11 categories"
     echo ""
-    echo -e "${BOLD}Available Categories:${NC}"
-    echo -e "  • Core (crashdetect, sscanf, streamer, nativechecker)"
-    echo -e "  • Database (mysql, pawn-redis)"
-    echo -e "  • Security (bcrypt, samp-crypto, whirlpool)"
-    echo -e "  • Network (pawn-requests, discord-connector)"
-    echo -e "  • World (MapAndreas, ColAndreas, FCNPC)"
+    echo -e "${BOLD}🔧 Categories:${NC}"
+    echo -e "  ${CYAN}[1]${NC} Core           - Essential plugins (crashdetect, sscanf, profiler)"
+    echo -e "  ${CYAN}[2]${NC} Database       - MySQL, Redis, MongoDB, PostgreSQL"
+    echo -e "  ${CYAN}[3]${NC} Security       - bcrypt, whirlpool, samp-crypto, 2FA"
+    echo -e "  ${CYAN}[4]${NC} Network        - HTTP, WebSocket, RakNet, Sockets"
+    echo -e "  ${CYAN}[5]${NC} World          - Streamer, MapAndreas, GPS, ColAndreas"
+    echo -e "  ${CYAN}[6]${NC} Integration    - Discord, Telegram, IRC, TeamSpeak"
+    echo -e "  ${CYAN}[7]${NC} Gameplay       - Damage, Weapons, Anti-cheat, Admin"
+    echo -e "  ${CYAN}[8]${NC} UI             - TextDraw, Dialogs, Inventory, HUD"
+    echo -e "  ${CYAN}[9]${NC} System         - Racing, Housing, Jobs, Businesses"
+    echo -e "  ${CYAN}[10]${NC} Utility        - CMD, Logging, Progress bars, Foreach"
+    echo -e "  ${CYAN}[11]${NC} Language       - PawnPlus, JSON, XML, Regex"
     echo ""
-    echo -e "${BOLD}Example:${NC} fpawn --plugin install crashdetect"
+    echo -e "${BOLD}⚡ Quick Install:${NC}"
+    echo -e "  ${GREEN}fpawn --plugin install crashdetect${NC}"
+    echo -e "  ${GREEN}fpawn --plugin install streamer${NC}"
+    echo -e "  ${GREEN}fpawn --plugin install mysql${NC}"
+    echo ""
+    echo -e "${BOLD}📋 Browse Category:${NC}"
+    echo -e "  ${GREEN}fpawn --plugin list Core${NC}"
+    echo -e "  ${GREEN}fpawn --plugin list Database${NC}"
+    echo ""
+    echo -e "${YELLOW}[Notice]${NC} Interactive TUI with checkboxes coming in v19.1"
+    echo -e "${BLUE}[Tip]${NC} Use --plugin list to see all plugins in a category"
 }
 
 # === PLUGIN INSTALLER ===
