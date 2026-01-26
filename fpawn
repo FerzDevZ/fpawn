@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 18.0 (Nebula Edition)
+# Version: 18.1 (Synthesis Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -21,7 +21,7 @@ GLOBAL_INC="$BASE_DIR/bin/includes"
 CONFIG_FILE="$HOME/.ferzdevz/fpawn/config"
 CACHE_DIR="$HOME/.ferzdevz/fpawn/cache/includes"
 
-# Colors (Nebula Sapphire Palette)
+# Colors (Synthesis Sapphire Palette)
 GREEN='\033[38;5;82m'
 BLUE='\033[38;5;39m'
 RED='\033[38;5;196m'
@@ -46,7 +46,7 @@ function load_config() {
 
 function set_lang() {
     local L=$1; grep -q "LANG=" "$CONFIG_FILE" && sed -i "s/LANG=.*/LANG=\"$L\"/" "$CONFIG_FILE" || echo "LANG=\"$L\"" >> "$CONFIG_FILE"
-    echo -e "${GREEN}[Success]${NC} Language set to $L. Restarting session..."
+    echo -e "${GREEN}[Success]${NC} Language updated to $L."
     LANG=$L
 }
 
@@ -55,7 +55,7 @@ function msg() {
     local ID=$1
     if [ "$LANG" == "id" ]; then
         case $ID in
-            welcome) echo "Selamat Datang di fpawn v18.0" ;;
+            welcome) echo "Selamat Datang di fpawn v18.1" ;;
             status) echo "Status Ekosistem" ;;
             menu_1) echo "Kompilasi Script" ;;
             menu_2) echo "Jalankan Instance" ;;
@@ -68,13 +68,15 @@ function msg() {
             menu_9) echo "Snippets Sandbox (🧪)" ;;
             menu_10) echo "Sinkronisasi Library" ;;
             menu_11) echo "Cloud Self-Update" ;;
+            menu_12) echo "Bahasa: ID" ;;
+            menu_13) echo "Neural Diagnose (🕵️)" ;;
             menu_0) echo "Matikan Suite" ;;
             entry_err) echo "Entry point tidak ditemukan." ;;
-            success) echo "Berhasil!" ;;
+            success) echo "Selesai!" ;;
         esac
     else
         case $ID in
-            welcome) echo "Welcome to fpawn v18.0" ;;
+            welcome) echo "Welcome to fpawn v18.1" ;;
             status) echo "Ecosystem Status" ;;
             menu_1) echo "Compile Target" ;;
             menu_2) echo "Start Instance" ;;
@@ -87,6 +89,8 @@ function msg() {
             menu_9) echo "Snippets Sandbox (🧪)" ;;
             menu_10) echo "Library Sync" ;;
             menu_11) echo "Cloud Self-Update" ;;
+            menu_12) echo "Language: EN" ;;
+            menu_13) echo "Neural Diagnose (🕵️)" ;;
             menu_0) echo "Shutdown Suite" ;;
             entry_err) echo "Entry point not detected." ;;
             success) echo "Success!" ;;
@@ -133,7 +137,7 @@ function git_orchestrator() {
     local MSG=$1
     if [ -d ".git" ]; then
         git add .
-        git commit -m "[fpawn v18.0] $MSG" &>/dev/null
+        git commit -m "[fpawn v18.1] $MSG" &>/dev/null
         echo -e "${LBLUE}[Git]${NC} Auto-commit: $MSG"
     fi
 }
@@ -163,23 +167,55 @@ function template_architect() {
     mkdir -p "$NAME/core" "$NAME/modules" "$NAME/src" "$NAME/include"
     cat > "$NAME/src/main.pwn" <<EOF
 #include <open.mp>
-main() { print("Modular Project: $NAME v18"); }
+main() { print("Modular Project: $NAME v18.1"); }
 EOF
     echo -e "${GREEN}[Success]${NC} $(msg success)"
+}
+
+# --- ANALYTICAL ENGINES (RESTORED) ---
+
+function static_analyst() {
+     local FILE=$(find_entry_point)
+     [ -z "$FILE" ] && { echo -e "${RED}[Error]${NC} $(msg entry_err)"; return 1; }
+     
+     echo -e "${BLUE}[Analyst]${NC} Deep-inspecting ${CYAN}$FILE${NC}..."
+     grep -q "main()" "$FILE" || echo -e " [!] ${YELLOW}Warning:${NC} Entry point 'main()' not found."
+     
+     local LINES=$(wc -l < "$FILE")
+     echo -e " [+] ${GREEN}Volume:${NC} $LINES lines of Pawn code."
+     
+     [ -f "pawn.json" ] && echo -e " [i] ${CYAN}Context:${NC} Advanced open.mp ecosystem detected."
+     [ -f "server.cfg" ] && echo -e " [i] ${YELLOW}Context:${NC} Legacy SA-MP ecosystem detected."
+     
+     echo -e "${GREEN}[Success]${NC} Analysis finalized."
+}
+
+function neural_diagnose() {
+    local LOG="log.txt"; [ -f "server_log.txt" ] && LOG="server_log.txt"
+    echo -e "${ORANGE}[Neural]${NC} Scan-sweep ${CYAN}$LOG${NC} for signatures..."
+    
+    if grep -q "Runtime error" "$LOG"; then
+        echo -e "${RED}[Signature]${NC} Logic overflow identified."
+        grep -A 5 "Runtime error" "$LOG" | tail -n 5
+    elif grep -q "backtrace" "$LOG"; then
+        echo -e "${RED}[Signature]${NC} Stacktrace detected."
+        grep -B 2 -A 10 "backtrace" "$LOG" | tail -n 12
+    else
+        echo -e "${GREEN}[Neutral]${NC} No critical anomalies detected."
+    fi
 }
 
 # --- ULTIMATE MARKETPLACE (🛍️) ---
 
 function marketplace_hub() {
-    local CAT=("Utility" "Gameplay" "Anti-Cheat" "Optimization")
-    echo -e " ${LBLUE}🌌 fpawn Marketplace - Featured Repositories${NC}"
-    echo -e " [1] openmultiplayer/open.mp-stdlib"
-    echo -e " [2] samp-incognito/samp-streamer-plugin"
-    echo -e " [3] pBlueG/SA-MP-MySQL"
-    echo -e " [4] Y-Less/sscanf"
+    echo -e " ${LBLUE}🌌 fpawn Marketplace - Synthesis Catalog${NC}"
+    echo -e " [1] openmultiplayer/open.mp-stdlib (Core Library)"
+    echo -e " [2] samp-incognito/samp-streamer-plugin (Streamer)"
+    echo -e " [3] pBlueG/SA-MP-MySQL (Database)"
+    echo -e " [4] Y-Less/sscanf (Parser)"
     echo -e " [5] Search Custom Galaxy..."
     echo ""
-    read -p " Select or Search: " MCHOICE
+    read -p " Select ID: " MCHOICE
     case $MCHOICE in
         1) repo_cloner "https://github.com/openmultiplayer/open.mp-stdlib" "open.mp-stdlib" ;;
         2) repo_cloner "https://github.com/samp-incognito/samp-streamer-plugin" "streamer" ;;
@@ -200,12 +236,47 @@ function find_entry_point() {
     echo "$ANY"
 }
 
-# --- TUI V5 NEBULA ---
+function project_scanner() {
+    echo -e "${BLUE}[Autopilot]${NC} Scanning Neural Grids..."
+    local MAIN_FILE=$(find_entry_point)
+    [[ -z "$MAIN_FILE" ]] && { echo -e "${RED}[Error]${NC} $(msg entry_err)"; return 1; }
+
+    local INCS=$(grep "#include" "$MAIN_FILE" | sed 's/.*<//;s/>.*//;s/.*"//;s/".*//' | sort -u)
+    local MISSING_LIST=(); local CORRUPT_LIST=()
+    local SEARCH_PATHS=("include" "pawno/include" "dependencies" "$GLOBAL_INC" "$CACHE_DIR")
+    
+    for INC in $INCS; do
+        [[ "$INC" =~ ^(core|float|string|file|time|datagram|console)$ ]] && continue
+        local FOUND=false; local CORRUPT=false
+        for PD in "${SEARCH_PATHS[@]}"; do 
+            if [ -f "$PD/$INC.inc" ]; then
+                FOUND=true; head -n 1 "$PD/$INC.inc" | grep -q "404:" && CORRUPT=true; break
+            fi
+        done
+        [ "$FOUND" = false ] && MISSING_LIST+=("$INC"); [ "$CORRUPT" = true ] && CORRUPT_LIST+=("$INC")
+    done
+
+    if [ ${#MISSING_LIST[@]} -eq 0 ] && [ ${#CORRUPT_LIST[@]} -eq 0 ]; then
+        echo -e "${GREEN}[Ready]${NC} System integrity verified."
+    else
+        [ ${#CORRUPT_LIST[@]} -gt 0 ] && echo -e "${RED}[Warning]${NC} Corrupted components: ${CORRUPT_LIST[*]}"
+        read -p "Execute Repair? [y/N] " ANS
+        if [[ "$ANS" == "y" ]]; then
+            for M in "${MISSING_LIST[@]}" "${CORRUPT_LIST[@]}"; do
+                rm -f "include/$M.inc" "$CACHE_DIR/$M.inc"
+                echo -e "${BLUE}[Sync]${NC} Restoring $M..."
+                smart_finder "$M.inc" || dynamic_search "$M"
+            done
+        fi
+    fi
+}
+
+# --- TUI V5.1 SYNTHESIS ---
 
 function show_header() {
     clear
     echo -e " ${WHITE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e " ${WHITE}║${NC}${BOLD}${CYAN}      fpawn v18.0 - FerzDevZ Nebula Edition               ${NC}${WHITE}║${NC}"
+    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v18.1 - FerzDevZ Synthesis Edition             ${NC}${WHITE}║${NC}"
     echo -e " ${WHITE}╚══════════════════════════════════════════════════════════╝${NC}"
     local STATUS="${RED}DARK${NC}"
     [ -f "pawn.json" ] && STATUS="${GREEN}SYNCHRONIZED (OMP)${NC}"
@@ -216,38 +287,39 @@ function show_header() {
 
 function show_dashboard() {
     show_header
-    echo -e "  ${BOLD}ENGINEERING${NC}                    ${BOLD}NEBULA CORE${NC}"
+    echo -e "  ${BOLD}ENGINEERING${NC}                    ${BOLD}SYNTHESIS HUB${NC}"
     echo -e "  [1] $(msg menu_1)             [4] $(msg menu_4)"
     echo -e "  [2] $(msg menu_2)             [5] $(msg menu_5)"
     echo -e "  [3] $(msg menu_3)             [6] $(msg menu_6)"
     echo ""
-    echo -e "  ${BOLD}DEVELOPER LAB${NC}                  ${BOLD}SYSTEM${NC}"
+    echo -e "  ${BOLD}ANALYSIS & LAB${NC}                 ${BOLD}SYSTEM${NC}"
     echo -e "  [7] $(msg menu_7)         [10] $(msg menu_10)"
     echo -e "  [8] $(msg menu_8)      [11] $(msg menu_11)"
-    echo -e "  [9] $(msg menu_9)         [12] Language: ${LANG^^}"
-    echo -e "  [0] $(msg menu_0)"
+    echo -e "  [9] $(msg menu_9)         [12] $(msg menu_12)"
+    echo -e "  [13] $(msg menu_13)        [0] $(msg menu_0)"
     echo ""
     echo -e " ${WHITE}────────────────────────────────────────────────────────────${NC}"
-    read -p " Selection Master: " CHOICE
+    read -p " Command Index: " CHOICE
     case $CHOICE in
         1) local F=$(find_entry_point); execute_compiler "auto" "auto" "${F:-main.pwn}"; exit ;;
         2) server_runner; exit ;;
         3) local F=$(find_entry_point); run_watch_mode "${F:-main.pwn}"; exit ;;
-        4) marketplace_hub; read -p "Done..."; show_dashboard ;;
-        5) static_analyst; read -p "Done..."; show_dashboard ;;
-        6) project_scanner; read -p "Done..."; show_dashboard ;;
-        7) read -p " Target: " FT; code_polisher "$FT"; read -p "Done..."; show_dashboard ;;
-        8) template_architect; read -p "Done..."; show_dashboard ;;
+        4) marketplace_hub; read -p "Enter..."; show_dashboard ;;
+        5) static_analyst; read -p "Enter..."; show_dashboard ;;
+        6) project_scanner; read -p "Enter..."; show_dashboard ;;
+        7) read -p " Target: " FT; code_polisher "$FT"; read -p "Enter..."; show_dashboard ;;
+        8) template_architect; read -p "Enter..."; show_dashboard ;;
         9) snippet_sandbox; show_dashboard ;;
-        10) library_updater; read -p "Done..."; show_dashboard ;;
+        10) library_updater; read -p "Enter..."; show_dashboard ;;
         11) self_update; exit ;;
         12) [ "$LANG" == "id" ] && set_lang "en" || set_lang "id"; show_dashboard ;;
+        13) neural_diagnose; read -p "Enter..."; show_dashboard ;;
         0) exit 0 ;;
         *) show_dashboard ;;
     esac
 }
 
-# --- CORE LOGIC (VITAL) ---
+# --- CORE LOGIC ---
 
 function execute_compiler() {
     local ENG=$1; local PROF=$2; shift 2; local FILE="${!#}"; local ARGS=(); [ $# -gt 1 ] && ARGS=("${@:1:$#-1}")
@@ -274,20 +346,24 @@ function execute_compiler() {
 
 function repo_cloner() {
     local URL=$1; local NAME=$2; echo -e "${BLUE}[Cloner]${NC} Syncing $NAME..."; git clone --depth 1 "$URL" "$NAME"
-    [ $? -eq 0 ] && { echo -e "${GREEN}[Success]${NC} $(msg success)"; git_orchestrator "Installed plugin $NAME"; } || echo -e "${RED}[Error]${NC} Failed."
+    [ $? -eq 0 ] && { echo -e "${GREEN}[Success]${NC} $(msg success)"; git_orchestrator "Installed $NAME"; } || echo -e "${RED}[Error]${NC} Failed."
 }
 
 function dynamic_search() {
     local QUERY=$1; echo -e "${BLUE}[Neural]${NC} Accessing GitHub Vault..."
     local JSON=$(curl -s "https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars")
-    RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
+    local RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
     if [ -n "$RESULTS" ]; then
         local i=1; local URLS=(); local NAMES=()
         IFS=$'\n'; for RES in $RESULTS; do
-            URLS+=( "$(echo "$RES" | cut -d'|' -f2)" ); NAMES+=( "$(echo "$RES" | cut -d'|' -f1 | cut -d'/' -f2)" )
-            echo -e " [i] [$i] ${BOLD}${CYAN}$(echo "$RES" | cut -d'|' -f1)${NC} - $(echo "$RES" | cut -d'|' -f3)"; ((i++))
+            local FNAME=$(echo "$RES" | cut -d'|' -f1); local FURL=$(echo "$RES" | cut -d'|' -f2); local FDESC=$(echo "$RES" | cut -d'|' -f3)
+            URLS+=( "$FURL" ); NAMES+=( "${FNAME#*/}" )
+            echo -e " [$i] ${BOLD}${CYAN}$FNAME${NC}"
+            [ -n "$FDESC" ] && [[ "$FDESC" != "null" ]] && echo -e "     ${MAGENTA}Note:${NC} $FDESC"
+            echo -e "     ${BLUE}Repo:${NC} $FURL"
+            ((i++))
         done; unset IFS
-        read -p " Clone Index [1-5]: " PICK
+        read -p " Index to Clone [1-5]: " PICK
         [[ "$PICK" =~ ^[1-5]$ ]] && repo_cloner "${URLS[$PICK-1]}" "${NAMES[$PICK-1]}"
     fi
 }
@@ -295,9 +371,9 @@ function dynamic_search() {
 function self_update() {
     local R="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/fpawn"
     curl -L -s -o /tmp/fupd "$R"; local NV=$(grep "Version:" /tmp/fupd | head -n 1 | awk '{print $3}')
-    if [ "$NV" != "18.0" ] && [ -n "$NV" ]; then
-         echo -e "${YELLOW}[Alert]${NC} Master v$NV ready. Upgrading..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
-    else echo -e "${GREEN}[Ready]${NC} System is Nebula standard."; fi
+    if [ "$NV" != "18.1" ] && [ -n "$NV" ]; then
+         echo -e "${YELLOW}[Alert]${NC} System elevated to v$NV via Cloud Link..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
+    else echo -e "${GREEN}[Ready]${NC} Synthesis standard achieved."; fi
 }
 
 function library_updater() {
@@ -306,6 +382,15 @@ function library_updater() {
     curl -L -s -o "$CACHE_DIR/open.mp.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/open.mp.inc"
     curl -L -s -o "$CACHE_DIR/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
     cp "$CACHE_DIR/"*.inc "$TD/"; echo -e "${GREEN}[Done]${NC} $(msg success)"
+}
+
+function smart_finder() {
+    local INC=$1; local RESP=$(curl -s "https://api.github.com/search/code?q=filename:$INC+extension:inc")
+    local URL=$(echo "$RESP" | grep -o "\"html_url\": \"[^\"]*\"" | head -n 1 | sed 's/"html_url": //;s/"//g;s/github.com/raw.githubusercontent.com/;s/\/blob\//\//')
+    if [ -n "$URL" ]; then 
+        mkdir -p "$CACHE_DIR"; curl -L -s -o "$CACHE_DIR/$INC" "$URL"
+        [ -f "$CACHE_DIR/$INC" ] && ! head -n 1 "$CACHE_DIR/$INC" | grep -q "404:" && { cp "$CACHE_DIR/$INC" "include/"; return 0; }
+    fi; return 1
 }
 
 function server_runner() {
