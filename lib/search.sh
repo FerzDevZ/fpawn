@@ -111,12 +111,37 @@ function search_dynamic_search() {
 
 # === REPOSITORY CLONER ===
 
+function search_validate_repo() {
+    local URL=$1
+    # Check if URL returns 200 via curl (follow redirects)
+    curl -I -s -L "$URL" | grep -q "HTTP/.* 200"
+    return $?
+}
+
 function search_repo_cloner() {
     local URL=$1
     local NAME=$2
     
     echo -e "${BLUE}[Cloner]${NC} Syncing $NAME..."
-    git clone --depth 1 "$URL" "$NAME"
+    
+    # 0. Existence check
+    if [ -d "$NAME" ]; then
+        core_warning "Directory '$NAME' already exists. Synchronizing with existing origin..."
+        (cd "$NAME" && git remote set-url origin "$URL" && git pull origin main 2>/dev/null)
+        core_success "Synchronized existing repository."
+        return 0
+    fi
+
+    # 1. Pre-validation
+    if ! search_validate_repo "$URL"; then
+        core_error "Repository or file is inaccessible: $URL (404 or Private)"
+        echo -e "${YELLOW}[Neural]${NC} This plugin might have been archived or moved."
+        return 1
+    fi
+
+    # 2. Non-interactive Clone
+    # GIT_TERMINAL_PROMPT=0 prevents interactive credential prompts
+    GIT_TERMINAL_PROMPT=0 git clone --depth 1 "$URL" "$NAME" 2>/dev/null
     
     if [ $? -eq 0 ]; then
         core_success "$(msg success)"
