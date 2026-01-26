@@ -1,28 +1,29 @@
-# fpawn v16.3 - FerzDevZ Master Integrity
+# fpawn v18.0 - FerzDevZ Nebula Edition
 
-Versi 16.3 adalah penyempurna total dari sistem library Anda. Kami memastikan tidak ada file korup yang menghentikan progres coding Anda.
+Inilah lompatan revolusioner terakhir kita. Versi 18.0 membawa `fpawn` melampaui batas asisten biasa menuju satu ekosistem pengembangan yang mandiri dan cerdas.
 
-## Fitur Unggulan v16.3: Immutable Integrity
+## Fitur Legendaris v18.0: The Nebula Leap
 
-### 1. 404 Detect & Repair (`[6]`) - **VITAL**
-Terkadang download dari GitHub gagal dan menyimpan file kosong atau teks error (404).
-- **Auto-Health Check**: Jika `fpawn` mendeteksi file "404", dia akan otomatis menghapusnya.
-- **One-Key Repair**: Melalui menu **Project Autopilot**, Anda bisa memperbaiki seluruh struktur include yang rusak dalam hitungan detik.
+### 1. Snippet Sandbox (Pawn Lab) 🧪
+- **Latar Belakang**: Terkadang Anda hanya ingin mencoba 10 baris kode matematika tanpa merusak file project utama.
+- **Solusi**: `fpawn --sandbox`. Script akan membuat lingkungan Lab terisolasi di `/tmp`. Anda bisa menulis kode, mencoba kompilasi, dan sandbox akan dihapus otomatis saat Anda selesai. Aman & cepat.
 
-### 2. Robust open.mp Refresher (`[10]`)
-Kami telah memperbarui jalur standar library.
-- Sekarang, `fpawn` mendownload **Standard Library (stdlib)** asli dari repository resmi `openmultiplayer`.
-- Menjamin fungsi-fungsi terbaru open.mp selalu tersedia dan valid di project Anda.
+### 2. Ultimate Marketplace TUI 🛍️
+- **Upgrade**: Menu **[4]** kini bukan cuma search bar, tapi sebuah katalog.
+- **Featured**: Kami menampilkan daftar plugin "Trending" dan "Featured" (Streamer, MySQL, sscanf) yang bisa dipasang dengan satu tombol, berbalut estetika **Sapphire Nebula**.
 
-### 3. CLI Refresh (`--refresh`)
-Tidak ingin masuk ke menu? Cukup ketik `fpawn --refresh` dari terminal untuk mensinkronkan ulang seluruh library inti Anda ke versi paling segar.
+### 3. Git Auto-Pilot 🚁
+- **Asuransi Progress**: `fpawn` kini terintegrasi dengan Git. Setiap kali Anda melakukan perbaikan kode (`--polish`) atau memasang plugin, dia akan otomatis membuat local commit. Progress Anda tidak akan pernah hilang.
+
+### 4. Localization Engine (ID/EN) 🇮🇩🇺🇸
+- **Fleksibilitas**: Pilih antara Bahasa Indonesia atau English via menu **[12]**. Tool premium untuk kenyamanan maksimal Anda.
 
 ---
 
-## Cara Update ke v16.3
-Jalankan installer global untuk mengaktifkan engine proteksi integrity yang baru:
+## Cara Update ke v18.0 (Final Leap)
+Jalankan installer global untuk mempersembahkan mahakarya Nebula ini ke sistem Anda:
 ```bash
 ./install.sh
 ```
 
-**Powered by FerzDevZ** (The Absolute Golden Standard)
+**Powered by FerzDevZ** (The Apex of Engineering)
