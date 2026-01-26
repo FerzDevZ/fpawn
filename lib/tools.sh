@@ -44,28 +44,106 @@ function tools_code_polisher() {
 # === ARCHITECT TEMPLATE ===
 
 function tools_template_architect() {
-    echo -e "${BLUE}[Architect]${NC} Casting Modular Foundation..."
-    
-    local NAME="gm_modular"
+    # Check for whiptail
+    if ! command -v whiptail &> /dev/null; then
+        core_error "Whiptail not found. Architecture selection requires whiptail."
+        return 1
+    fi
+
+    local ARCH_CHOICE=$(whiptail --title "fpawn Architect" --menu "Select Project Architecture:" 15 60 2 \
+        "Legacy" "Classic SA-MP structure (0.3.7)" \
+        "Advanced" "Modern open.mp modular structure" 3>&1 1>&2 2>&3)
+
+    [ -z "$ARCH_CHOICE" ] && return
+
+    local NAME="new_project"
     read -p " Project Name: " PNAME
     [ -n "$PNAME" ] && NAME=$PNAME
-    
-    # Create structure
-    mkdir -p "$NAME/core" "$NAME/modules" "$NAME/src" "$NAME/include"
-    
-    # Generate main file
-    cat > "$NAME/src/main.pwn" <<EOF
-#include <open.mp>
+
+    echo -e "${BLUE}[Architect]${NC} Casting $ARCH_CHOICE Foundation for ${CYAN}$NAME${NC}..."
+
+    if [ "$ARCH_CHOICE" == "Legacy" ]; then
+        # Legacy Structure
+        mkdir -p "$NAME/src" "$NAME/include" "$NAME/plugins" "$NAME/gamemodes" "$NAME/filterscripts"
+        
+        # Legacy server.cfg
+        cat > "$NAME/server.cfg" <<EOF
+echo Executing Server Config...
+lanmode 0
+rcon_password change_me
+maxplayers 50
+port 7777
+hostname SA-MP Legacy: $NAME
+gamemode0 main 1
+filterscripts 
+plugins 
+announce 0
+chatlogging 0
+weburl www.sa-mp.com
+onfoot_rate 40
+incar_rate 40
+weapon_rate 40
+stream_distance 300.0
+stream_rate 1000
+maxnpc 0
+logtimeformat [%H:%M:%S]
+language English
+EOF
+
+        # Legacy Main
+        cat > "$NAME/src/main.pwn" <<EOF
+#include <a_samp>
 
 main() {
     print("----------------------------------");
-    print(" Modular Project: $NAME v19.0    ");
+    print(" Legacy Project: $NAME v19.3    ");
     print(" Powered by FerzDevZ fpawn        ");
     print("----------------------------------");
 }
 EOF
-    
-    core_success "Modular structure '$NAME' generated"
+        core_success "Legacy SA-MP structure '$NAME' generated"
+        
+    else
+        # Advanced (OMP) Structure
+        mkdir -p "$NAME/core" "$NAME/modules" "$NAME/src" "$NAME/include" "$NAME/dependencies"
+        
+        # OMP pawn.json
+        cat > "$NAME/pawn.json" <<EOF
+{
+    "user": "FerzDevZ",
+    "repo": "$NAME",
+    "entry": "src/main.pwn",
+    "output": "gamemodes/main.amx",
+    "dependencies": [
+        "openmultiplayer/open.mp-stdlib"
+    ]
+}
+EOF
+
+        # OMP config.json
+        cat > "$NAME/config.json" <<EOF
+{
+    "hostname": "open.mp server: $NAME",
+    "gamemode": "main",
+    "pawn": {
+        "main_scripts": ["main"]
+    }
+}
+EOF
+
+        # OMP Main
+        cat > "$NAME/src/main.pwn" <<EOF
+#include <open.mp>
+
+main() {
+    print("----------------------------------");
+    print(" Advanced Project: $NAME v19.3  ");
+    print(" Powered by FerzDevZ fpawn        ");
+    print("----------------------------------");
+}
+EOF
+        core_success "Modular open.mp structure '$NAME' generated"
+    fi
 }
 
 # === SNIPPET SANDBOX ===

@@ -7,7 +7,7 @@
 function ui_show_header() {
     clear
     echo -e " ${WHITE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v19.1 - FerzDevZ Interactive Dashboard         ${NC}${WHITE}║${NC}"
+    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v19.3 - FerzDevZ Architect Reborn              ${NC}${WHITE}║${NC}"
     echo -e " ${WHITE}╚══════════════════════════════════════════════════════════╝${NC}"
     
     # Detect ecosystem status
