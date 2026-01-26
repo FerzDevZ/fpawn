@@ -6,7 +6,7 @@
 INSTALL_DIR="$HOME/.ferzdevz/fpawn"
 BIN_DIR="$HOME/.local/bin"
 
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v18.1 (Synthesis Edition)..."
+echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v18.2 (Precision Suite)..."
 
 # 0. Prepare Directories
 mkdir -p "$INSTALL_DIR/cache/includes"

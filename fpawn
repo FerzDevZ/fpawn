@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 18.1 (Synthesis Edition)
+# Version: 18.2 (Precision Suite)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -21,7 +21,7 @@ GLOBAL_INC="$BASE_DIR/bin/includes"
 CONFIG_FILE="$HOME/.ferzdevz/fpawn/config"
 CACHE_DIR="$HOME/.ferzdevz/fpawn/cache/includes"
 
-# Colors (Synthesis Sapphire Palette)
+# Colors (Precision Sapphire Palette)
 GREEN='\033[38;5;82m'
 BLUE='\033[38;5;39m'
 RED='\033[38;5;196m'
@@ -55,7 +55,7 @@ function msg() {
     local ID=$1
     if [ "$LANG" == "id" ]; then
         case $ID in
-            welcome) echo "Selamat Datang di fpawn v18.1" ;;
+            welcome) echo "Selamat Datang di fpawn v18.2" ;;
             status) echo "Status Ekosistem" ;;
             menu_1) echo "Kompilasi Script" ;;
             menu_2) echo "Jalankan Instance" ;;
@@ -76,7 +76,7 @@ function msg() {
         esac
     else
         case $ID in
-            welcome) echo "Welcome to fpawn v18.1" ;;
+            welcome) echo "Welcome to fpawn v18.2" ;;
             status) echo "Ecosystem Status" ;;
             menu_1) echo "Compile Target" ;;
             menu_2) echo "Start Instance" ;;
@@ -137,7 +137,7 @@ function git_orchestrator() {
     local MSG=$1
     if [ -d ".git" ]; then
         git add .
-        git commit -m "[fpawn v18.1] $MSG" &>/dev/null
+        git commit -m "[fpawn v18.2] $MSG" &>/dev/null
         echo -e "${LBLUE}[Git]${NC} Auto-commit: $MSG"
     fi
 }
@@ -167,12 +167,12 @@ function template_architect() {
     mkdir -p "$NAME/core" "$NAME/modules" "$NAME/src" "$NAME/include"
     cat > "$NAME/src/main.pwn" <<EOF
 #include <open.mp>
-main() { print("Modular Project: $NAME v18.1"); }
+main() { print("Modular Project: $NAME v18.2"); }
 EOF
     echo -e "${GREEN}[Success]${NC} $(msg success)"
 }
 
-# --- ANALYTICAL ENGINES (RESTORED) ---
+# --- ANALYTICAL ENGINES ---
 
 function static_analyst() {
      local FILE=$(find_entry_point)
@@ -193,6 +193,8 @@ function static_analyst() {
 function neural_diagnose() {
     local LOG="log.txt"; [ -f "server_log.txt" ] && LOG="server_log.txt"
     echo -e "${ORANGE}[Neural]${NC} Scan-sweep ${CYAN}$LOG${NC} for signatures..."
+    
+    if [ ! -f "$LOG" ]; then echo -e "${RED}[Error]${NC} Log file missing."; return 1; fi
     
     if grep -q "Runtime error" "$LOG"; then
         echo -e "${RED}[Signature]${NC} Logic overflow identified."
@@ -264,19 +266,25 @@ function project_scanner() {
         if [[ "$ANS" == "y" ]]; then
             for M in "${MISSING_LIST[@]}" "${CORRUPT_LIST[@]}"; do
                 rm -f "include/$M.inc" "$CACHE_DIR/$M.inc"
-                echo -e "${BLUE}[Sync]${NC} Restoring $M..."
-                smart_finder "$M.inc" || dynamic_search "$M"
+                # --- PRECISION INTERCEPTION (Fix for Core Repair) ---
+                if [[ "$M" =~ ^(open.mp|a_samp|omp_version)$ ]]; then
+                    echo -e "${BLUE}[Repair]${NC} Restoring Core Ecosystem: $M..."
+                    library_updater # Calls high-priority official refresh
+                else
+                    echo -e "${BLUE}[Sync]${NC} Restoring Plugin: $M..."
+                    smart_finder "$M.inc" || dynamic_search "$M"
+                fi
             done
         fi
     fi
 }
 
-# --- TUI V5.1 SYNTHESIS ---
+# --- TUI V5.2 PRECISION ---
 
 function show_header() {
     clear
     echo -e " ${WHITE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v18.1 - FerzDevZ Synthesis Edition             ${NC}${WHITE}║${NC}"
+    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v18.2 - FerzDevZ Precision Suite               ${NC}${WHITE}║${NC}"
     echo -e " ${WHITE}╚══════════════════════════════════════════════════════════╝${NC}"
     local STATUS="${RED}DARK${NC}"
     [ -f "pawn.json" ] && STATUS="${GREEN}SYNCHRONIZED (OMP)${NC}"
@@ -287,7 +295,7 @@ function show_header() {
 
 function show_dashboard() {
     show_header
-    echo -e "  ${BOLD}ENGINEERING${NC}                    ${BOLD}SYNTHESIS HUB${NC}"
+    echo -e "  ${BOLD}ENGINEERING${NC}                    ${BOLD}PRECISION HUB${NC}"
     echo -e "  [1] $(msg menu_1)             [4] $(msg menu_4)"
     echo -e "  [2] $(msg menu_2)             [5] $(msg menu_5)"
     echo -e "  [3] $(msg menu_3)             [6] $(msg menu_6)"
@@ -353,32 +361,36 @@ function dynamic_search() {
     local QUERY=$1; echo -e "${BLUE}[Neural]${NC} Accessing GitHub Vault..."
     local JSON=$(curl -s "https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars")
     local RESULTS=$(echo "$JSON" | jq -r '.items[] | select(.html_url != null) | "\(.full_name)|\(.html_url)|\(.description)"' | head -n 5)
-    if [ -n "$RESULTS" ]; then
-        local i=1; local URLS=(); local NAMES=()
-        IFS=$'\n'; for RES in $RESULTS; do
-            local FNAME=$(echo "$RES" | cut -d'|' -f1); local FURL=$(echo "$RES" | cut -d'|' -f2); local FDESC=$(echo "$RES" | cut -d'|' -f3)
-            URLS+=( "$FURL" ); NAMES+=( "${FNAME#*/}" )
-            echo -e " [$i] ${BOLD}${CYAN}$FNAME${NC}"
-            [ -n "$FDESC" ] && [[ "$FDESC" != "null" ]] && echo -e "     ${MAGENTA}Note:${NC} $FDESC"
-            echo -e "     ${BLUE}Repo:${NC} $FURL"
-            ((i++))
-        done; unset IFS
-        read -p " Index to Clone [1-5]: " PICK
-        [[ "$PICK" =~ ^[1-5]$ ]] && repo_cloner "${URLS[$PICK-1]}" "${NAMES[$PICK-1]}"
+    
+    if [ -z "$RESULTS" ]; then
+        echo -e "${RED}[Notice]${NC} No repositories found in the Pawn galaxy for '${CYAN}$QUERY${NC}'."
+        return
     fi
+
+    local i=1; local URLS=(); local NAMES=()
+    IFS=$'\n'; for RES in $RESULTS; do
+        local FNAME=$(echo "$RES" | cut -d'|' -f1); local FURL=$(echo "$RES" | cut -d'|' -f2); local FDESC=$(echo "$RES" | cut -d'|' -f3)
+        URLS+=( "$FURL" ); NAMES+=( "${FNAME#*/}" )
+        echo -e " [$i] ${BOLD}${CYAN}$FNAME${NC}"
+        [ -n "$FDESC" ] && [[ "$FDESC" != "null" ]] && echo -e "     ${MAGENTA}Note:${NC} $FDESC"
+        echo -e "     ${BLUE}Repo:${NC} $FURL"
+        ((i++))
+    done; unset IFS
+    read -p " Index to Clone [1-5]: " PICK
+    [[ "$PICK" =~ ^[1-5]$ ]] && repo_cloner "${URLS[$PICK-1]}" "${NAMES[$PICK-1]}"
 }
 
 function self_update() {
     local R="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/fpawn"
     curl -L -s -o /tmp/fupd "$R"; local NV=$(grep "Version:" /tmp/fupd | head -n 1 | awk '{print $3}')
-    if [ "$NV" != "18.1" ] && [ -n "$NV" ]; then
-         echo -e "${YELLOW}[Alert]${NC} System elevated to v$NV via Cloud Link..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
-    else echo -e "${GREEN}[Ready]${NC} Synthesis standard achieved."; fi
+    if [ "$NV" != "18.2" ] && [ -n "$NV" ]; then
+         echo -e "${YELLOW}[Alert]${NC} High-priority patch v$NV detected. Upgrading..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
+    else echo -e "${GREEN}[Ready]${NC} Precision standard achieved."; fi
 }
 
 function library_updater() {
     local TD="include"; [ -d "pawno/include" ] && TD="pawno/include"; mkdir -p "$TD" "$CACHE_DIR"
-    echo -e "${BLUE}[Cache]${NC} Seeding Global Ecosystem..."
+    echo -e "${BLUE}[Refresher]${NC} Synchronizing Core Distribution..."
     curl -L -s -o "$CACHE_DIR/open.mp.inc" "https://raw.githubusercontent.com/openmultiplayer/open.mp-stdlib/master/open.mp.inc"
     curl -L -s -o "$CACHE_DIR/a_samp.inc" "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
     cp "$CACHE_DIR/"*.inc "$TD/"; echo -e "${GREEN}[Done]${NC} $(msg success)"
@@ -406,6 +418,8 @@ while [[ $# -gt 0 ]]; do
         --sandbox) snippet_sandbox; exit 0 ;;
         --lang) set_lang "$2"; exit 0 ;;
         --polish) code_polisher "$2"; exit 0 ;;
+        --analyze) static_analyst; exit 0 ;;
+        --diagnose) neural_diagnose; exit 0 ;;
         --search) dynamic_search "$2"; exit 0 ;;
         --scan) project_scanner; exit 0 ;;
         --refresh) library_updater; exit 0 ;;
