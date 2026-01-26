@@ -131,6 +131,42 @@ function compiler_library_updater() {
     curl -L -s -o "$FPAWN_CACHE_DIR/a_samp.inc" \
         "https://raw.githubusercontent.com/pawn-lang/samp-stdlib/master/a_samp.inc"
     
-    cp "$FPAWN_CACHE_DIR/"*.inc "$TD/" 2>/dev/null
-    core_success "$(msg success)"
+# === WATCH MODE (LIVE RELOAD) ===
+
+function compiler_watch_mode() {
+    local TARGET=$1
+    [ -z "$TARGET" ] && TARGET=$(compiler_find_entry_point)
+    [ -z "$TARGET" ] && { core_error "No target file found to watch."; return 1; }
+
+    echo -e "${BLUE}[Watch]${NC} Live Reload Engine Active for ${CYAN}$TARGET${NC}"
+    echo -e "${BLUE}[Watch]${NC} Monitoring project for changes... (Press Ctrl+C to stop)"
+
+    # Trap Ctrl+C to exit cleanly
+    trap "echo -e '\n${YELLOW}[Watch]${NC} Engine de-activated.'; return" SIGINT
+
+    local LAST_HASH=""
+    
+    if command -v inotifywait &> /dev/null; then
+        echo -e "${GREEN}[Mode]${NC} High-Performance (inotify)"
+        while true; do
+            inotifywait -r -e modify,create,delete --exclude '\.amx$' . 2>/dev/null
+            echo -e "${BLUE}[Event]${NC} Change detected. Debouncing..."
+            sleep 0.5
+            compiler_execute "auto" "auto" "$TARGET"
+        done
+    else
+        echo -e "${YELLOW}[Mode]${NC} Standard Polling (No inotify-tools)"
+        while true; do
+            # Generate a hash of modification times for .pwn and .inc files
+            local CURRENT_HASH=$(find . -maxdepth 3 \( -name "*.pwn" -o -name "*.inc" \) -printf "%T@ %p\n" | md5sum)
+            
+            if [ "$LAST_HASH" != "" ] && [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
+                echo -e "${BLUE}[Event]${NC} Modification detected. Syncing..."
+                compiler_execute "auto" "auto" "$TARGET"
+            fi
+            
+            LAST_HASH="$CURRENT_HASH"
+            sleep 1
+        done
+    fi
 }

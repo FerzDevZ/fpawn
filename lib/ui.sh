@@ -7,7 +7,7 @@
 function ui_show_header() {
     clear
     echo -e " ${WHITE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v19.3 - FerzDevZ Architect Reborn              ${NC}${WHITE}║${NC}"
+    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v19.5 - FerzDevZ Live Reload Engine            ${NC}${WHITE}║${NC}"
     echo -e " ${WHITE}╚══════════════════════════════════════════════════════════╝${NC}"
     
     # Detect ecosystem status
@@ -46,10 +46,8 @@ function ui_show_dashboard() {
         2)  compiler_server_runner
             exit ;;
         3)  local F=$(compiler_find_entry_point)
-            # TODO: run_watch_mode "${F:-main.pwn}"
-            core_info "Watch mode coming soon"
-            read -p "Enter..."
-            ui_show_dashboard ;;
+            compiler_watch_mode "${F:-main.pwn}"
+            exit ;;
         4)  search_marketplace_hub
             read -p "Enter..."
             ui_show_dashboard ;;

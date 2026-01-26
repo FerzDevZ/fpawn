@@ -2,7 +2,7 @@
 
 # fpawn Master - Modular Architecture v19.0
 # Created for: FerzDevZ
-# Version: 19.3 (Architect Reborn Edition)
+# Version: 19.5 (Live Reload Engine Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -51,6 +51,10 @@ PASSED_ARGS=()
 while [[ $# -gt 0 ]]; do
     case $1 in
         # Tools
+        --watch)
+            compiler_watch_mode "$2"
+            exit 0
+            ;;
         --sandbox)
             tools_snippet_sandbox
             exit 0
