@@ -10,40 +10,57 @@ fi
 # === PLUGIN MANAGER TUI ===
 
 function plugins_manager_tui() {
-    echo -e "${LBLUE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${LBLUE}║${NC}${BOLD}${CYAN}          fpawn Plugin Manager - 80+ Plugins Available     ${NC}${LBLUE}║${NC}"
-    echo -e "${LBLUE}╚══════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    
-    # Get total count
-    local TOTAL=${#PLUGIN_DATABASE[@]}
-    
-    echo -e "${BOLD}📦 Database Stats:${NC} $TOTAL plugins across 11 categories"
-    echo ""
-    echo -e "${BOLD}🔧 Categories:${NC}"
-    echo -e "  ${CYAN}[1]${NC} Core           - Essential plugins (crashdetect, sscanf, profiler)"
-    echo -e "  ${CYAN}[2]${NC} Database       - MySQL, Redis, MongoDB, PostgreSQL"
-    echo -e "  ${CYAN}[3]${NC} Security       - bcrypt, whirlpool, samp-crypto, 2FA"
-    echo -e "  ${CYAN}[4]${NC} Network        - HTTP, WebSocket, RakNet, Sockets"
-    echo -e "  ${CYAN}[5]${NC} World          - Streamer, MapAndreas, GPS, ColAndreas"
-    echo -e "  ${CYAN}[6]${NC} Integration    - Discord, Telegram, IRC, TeamSpeak"
-    echo -e "  ${CYAN}[7]${NC} Gameplay       - Damage, Weapons, Anti-cheat, Admin"
-    echo -e "  ${CYAN}[8]${NC} UI             - TextDraw, Dialogs, Inventory, HUD"
-    echo -e "  ${CYAN}[9]${NC} System         - Racing, Housing, Jobs, Businesses"
-    echo -e "  ${CYAN}[10]${NC} Utility        - CMD, Logging, Progress bars, Foreach"
-    echo -e "  ${CYAN}[11]${NC} Language       - PawnPlus, JSON, XML, Regex"
-    echo ""
-    echo -e "${BOLD}⚡ Quick Install:${NC}"
-    echo -e "  ${GREEN}fpawn --plugin install crashdetect${NC}"
-    echo -e "  ${GREEN}fpawn --plugin install streamer${NC}"
-    echo -e "  ${GREEN}fpawn --plugin install mysql${NC}"
-    echo ""
-    echo -e "${BOLD}📋 Browse Category:${NC}"
-    echo -e "  ${GREEN}fpawn --plugin list Core${NC}"
-    echo -e "  ${GREEN}fpawn --plugin list Database${NC}"
-    echo ""
-    echo -e "${YELLOW}[Notice]${NC} Interactive TUI with checkboxes coming in v19.1"
-    echo -e "${BLUE}[Tip]${NC} Use --plugin list to see all plugins in a category"
+    # Check for whiptail
+    if ! command -v whiptail &> /dev/null; then
+        core_error "Whiptail not found. Please install it to use the Interactive Plugin Manager."
+        return 1
+    fi
+
+    while true; do
+        local CAT_CHOICE=$(whiptail --title "fpawn Plugin Manager v19.1" --menu "Select a category to browse plugins:" 20 60 11 \
+            "Core" "Essential plugins" \
+            "Database" "MySQL, Redis, etc." \
+            "Security" "Bcrypt, whirlpool, etc." \
+            "Network" "HTTP, WebSocket, etc." \
+            "World" "Streamer, GPS, etc." \
+            "Integration" "Discord, Telegram, etc." \
+            "Gameplay" "Damage, Weapons, etc." \
+            "UI" "TextDraw, Dialogs, etc." \
+            "System" "Racing, Housing, etc." \
+            "Utility" "CMD, Logging, etc." \
+            "Language" "PawnPlus, JSON, etc." 3>&1 1>&2 2>&3)
+
+        [ -z "$CAT_CHOICE" ] && break
+
+        # Prepare checkbox list for the selected category
+        local WHIP_ARGS=()
+        for PLUGIN in "${PLUGIN_DATABASE[@]}"; do
+            local PNAME=$(echo "$PLUGIN" | cut -d'|' -f1)
+            local PCAT=$(echo "$PLUGIN" | cut -d'|' -f2)
+            local PDESC=$(echo "$PLUGIN" | cut -d'|' -f5)
+            
+            if [ "$PCAT" == "$CAT_CHOICE" ]; then
+                WHIP_ARGS+=("$PNAME" "$PDESC" "OFF")
+            fi
+        done
+
+        if [ ${#WHIP_ARGS[@]} -eq 0 ]; then
+            whiptail --msgbox "No plugins found in category: $CAT_CHOICE" 10 40
+            continue
+        fi
+
+        local SELECTED=$(whiptail --title "Category: $CAT_CHOICE" --checklist "Select plugins to install (Space to toggle, Enter to confirm):" 20 70 10 \
+            "${WHIP_ARGS[@]}" 3>&1 1>&2 2>&3)
+
+        if [ -n "$SELECTED" ]; then
+            # Clean selected string (remove quotes)
+            SELECTED=$(echo "$SELECTED" | tr -d '"')
+            for S_PLUGIN in $SELECTED; do
+                plugins_install "$S_PLUGIN"
+            done
+            read -p "Installations completed. Press Enter to return..." PAUSE
+        fi
+    done
 }
 
 # === PLUGIN INSTALLER ===
