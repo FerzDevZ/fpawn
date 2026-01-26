@@ -6,15 +6,15 @@
 INSTALL_DIR="$HOME/.ferzdevz/fpawn"
 BIN_DIR="$HOME/.local/bin"
 
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v18.2 (Precision Suite)..."
+echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v18.3 (Auto-Ignition Edition)..."
 
 # 0. Prepare Directories
 mkdir -p "$INSTALL_DIR/cache/includes"
 
-# 0. Check Dependencies
+# 0. Check Dependencies (Assumption: Environment is Prepared)
 if ! command -v jq &> /dev/null; then
-    echo -e "\033[0;33m[Dependency]\033[0m 'jq' not found. Attempting to install..."
-    sudo apt-get update && sudo apt-get install -y jq || { echo -e "\033[0;31m[Error]\033[0m Please install 'jq' manually."; exit 1; }
+    echo -e "\033[0;31m[Error]\033[0m please install 'jq' manually."
+    exit 1
 fi
 
 # 1. Prepare Directory

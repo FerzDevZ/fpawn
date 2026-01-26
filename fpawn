@@ -2,7 +2,7 @@
 
 # fpawn Master - The Ultimate Pawn Application
 # Created for: FerzDevZ
-# Version: 18.2 (Precision Suite)
+# Version: 18.3 (Auto-Ignition Edition)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -40,8 +40,15 @@ function load_config() {
     REPO_OWNER="FerzDevZ"
     REPO_NAME="fpawn"
     mkdir -p "$(dirname "$CONFIG_FILE")" "$CACHE_DIR"
-    [ ! -f "$CONFIG_FILE" ] && echo -e "REPO_OWNER=\"FerzDevZ\"\nREPO_NAME=\"fpawn\"\nLANG=\"id\"" > "$CONFIG_FILE"
+    [ ! -f "$CONFIG_FILE" ] && echo -e "REPO_OWNER=\"FerzDevZ\"\nREPO_NAME=\"fpawn\"\nLANG=\"id\"\nAUTO_IGNITE=\"OFF\"" > "$CONFIG_FILE"
     source "$CONFIG_FILE"
+}
+
+function neural_memory_sync() {
+    local DATA=$1; local HFILE="$HOME/.ferzdevz/fpawn/history"
+    echo "$DATA" >> "$HFILE"
+    local LAST=$(tail -n 5 "$HFILE" | sort -u | tr '\n' ' ')
+    echo -e " ${LBLUE}[Memory]${NC} Recent: $LAST"
 }
 
 function set_lang() {
@@ -70,6 +77,7 @@ function msg() {
             menu_11) echo "Cloud Self-Update" ;;
             menu_12) echo "Bahasa: ID" ;;
             menu_13) echo "Neural Diagnose (🕵️)" ;;
+            menu_14) echo "Auto-Ignition: $AUTO_IGNITE" ;;
             menu_0) echo "Matikan Suite" ;;
             entry_err) echo "Entry point tidak ditemukan." ;;
             success) echo "Selesai!" ;;
@@ -91,6 +99,7 @@ function msg() {
             menu_11) echo "Cloud Self-Update" ;;
             menu_12) echo "Language: EN" ;;
             menu_13) echo "Neural Diagnose (🕵️)" ;;
+            menu_14) echo "Auto-Ignition: $AUTO_IGNITE" ;;
             menu_0) echo "Shutdown Suite" ;;
             entry_err) echo "Entry point not detected." ;;
             success) echo "Success!" ;;
@@ -211,6 +220,7 @@ function neural_diagnose() {
 
 function marketplace_hub() {
     echo -e " ${LBLUE}🌌 fpawn Marketplace - Synthesis Catalog${NC}"
+    [ -f "$HOME/.ferzdevz/fpawn/history" ] && echo -e " ${BOLD}Last Search:${NC} $(tail -n 1 "$HOME/.ferzdevz/fpawn/history")"
     echo -e " [1] openmultiplayer/open.mp-stdlib (Core Library)"
     echo -e " [2] samp-incognito/samp-streamer-plugin (Streamer)"
     echo -e " [3] pBlueG/SA-MP-MySQL (Database)"
@@ -223,7 +233,7 @@ function marketplace_hub() {
         2) repo_cloner "https://github.com/samp-incognito/samp-streamer-plugin" "streamer" ;;
         3) repo_cloner "https://github.com/pBlueG/SA-MP-MySQL" "mysql" ;;
         4) repo_cloner "https://github.com/Y-Less/sscanf" "sscanf" ;;
-        5) read -p " Keywords: " S; dynamic_search "$S" ;;
+        5) read -p " Keywords: " S; neural_memory_sync "$S"; dynamic_search "$S" ;;
         *) return ;;
     esac
 }
@@ -266,10 +276,10 @@ function project_scanner() {
         if [[ "$ANS" == "y" ]]; then
             for M in "${MISSING_LIST[@]}" "${CORRUPT_LIST[@]}"; do
                 rm -f "include/$M.inc" "$CACHE_DIR/$M.inc"
-                # --- PRECISION INTERCEPTION (Fix for Core Repair) ---
-                if [[ "$M" =~ ^(open.mp|a_samp|omp_version)$ ]]; then
-                    echo -e "${BLUE}[Repair]${NC} Restoring Core Ecosystem: $M..."
-                    library_updater # Calls high-priority official refresh
+                # --- AUTO-IGNITION PRECISION (Fix for Core Repair) ---
+                if [[ "$M" == "open.mp" ]] || [[ "$M" == "a_samp" ]] || [[ "$M" == "omp_version" ]]; then
+                    echo -e "${BLUE}[Repair]${NC} Restoring Official Distribution: $M..."
+                    library_updater
                 else
                     echo -e "${BLUE}[Sync]${NC} Restoring Plugin: $M..."
                     smart_finder "$M.inc" || dynamic_search "$M"
@@ -284,7 +294,7 @@ function project_scanner() {
 function show_header() {
     clear
     echo -e " ${WHITE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v18.2 - FerzDevZ Precision Suite               ${NC}${WHITE}║${NC}"
+    echo -e " ${WHITE}║${NC}${BOLD}${BLUE}      fpawn v18.3 - FerzDevZ Auto-Ignition Edition         ${NC}${WHITE}║${NC}"
     echo -e " ${WHITE}╚══════════════════════════════════════════════════════════╝${NC}"
     local STATUS="${RED}DARK${NC}"
     [ -f "pawn.json" ] && STATUS="${GREEN}SYNCHRONIZED (OMP)${NC}"
@@ -304,7 +314,8 @@ function show_dashboard() {
     echo -e "  [7] $(msg menu_7)         [10] $(msg menu_10)"
     echo -e "  [8] $(msg menu_8)      [11] $(msg menu_11)"
     echo -e "  [9] $(msg menu_9)         [12] $(msg menu_12)"
-    echo -e "  [13] $(msg menu_13)        [0] $(msg menu_0)"
+    echo -e "  [13] $(msg menu_13)        [14] $(msg menu_14)"
+    echo -e "  [0] $(msg menu_0)"
     echo ""
     echo -e " ${WHITE}────────────────────────────────────────────────────────────${NC}"
     read -p " Command Index: " CHOICE
@@ -322,6 +333,7 @@ function show_dashboard() {
         11) self_update; exit ;;
         12) [ "$LANG" == "id" ] && set_lang "en" || set_lang "id"; show_dashboard ;;
         13) neural_diagnose; read -p "Enter..."; show_dashboard ;;
+        14) [ "$AUTO_IGNITE" == "ON" ] && { AUTO_IGNITE="OFF"; sed -i 's/AUTO_IGNITE=.*/AUTO_IGNITE="OFF"/' "$CONFIG_FILE"; } || { AUTO_IGNITE="ON"; sed -i 's/AUTO_IGNITE=.*/AUTO_IGNITE="ON"/' "$CONFIG_FILE"; }; show_dashboard ;;
         0) exit 0 ;;
         *) show_dashboard ;;
     esac
@@ -348,8 +360,14 @@ function execute_compiler() {
     else
         wine "$PAWNO_DIR/pawncc.exe" "$FILE" "${ARGS[@]}" "${INC_FLAGS[@]}" "-i$PAWNO_DIR/include" > "$OUT" 2>&1
     fi
+    local STAT=$?
     cat "$OUT" | sed -u -e "s/error \([0-9]\{3\}\)/\x1b[1;31merror \1\x1b[0m/g" -e "s/warning \([0-9]\{3\}\)/\x1b[1;33mwarning \1\x1b[0m/g"
-    return $?
+    
+    if [ $STAT -eq 0 ] && [ "$AUTO_IGNITE" == "ON" ]; then
+        echo -e "${GREEN}[Ignite]${NC} Compilation successful. Launching Master Instance..."
+        server_runner
+    fi
+    return $STAT
 }
 
 function repo_cloner() {
@@ -383,7 +401,7 @@ function dynamic_search() {
 function self_update() {
     local R="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/fpawn"
     curl -L -s -o /tmp/fupd "$R"; local NV=$(grep "Version:" /tmp/fupd | head -n 1 | awk '{print $3}')
-    if [ "$NV" != "18.2" ] && [ -n "$NV" ]; then
+    if [ "$NV" != "18.3" ] && [ -n "$NV" ]; then
          echo -e "${YELLOW}[Alert]${NC} High-priority patch v$NV detected. Upgrading..."; cp /tmp/fupd "$BASE_DIR/fpawn"; chmod +x "$BASE_DIR/fpawn"; exit 0
     else echo -e "${GREEN}[Ready]${NC} Precision standard achieved."; fi
 }
