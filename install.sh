@@ -1,54 +1,48 @@
 #!/bin/bash
 
-# fpawn Global Installer
-# FerzDevZ Intelligence & Mastery
+# FERZDEVZ FPAWN PRO - LINUX AUTO-INSTALLER
+# Unified Installation Script for Debian, Ubuntu, and RHEL-based systems.
 
-INSTALL_DIR="$HOME/.ferzdevz/fpawn"
-BIN_DIR="$HOME/.local/bin"
+set -e
 
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v25.0 (Intelligence Frontier)..."
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
-# 0. Check Dependencies
-if ! command -v jq &> /dev/null; then
-    echo -e "\033[0;31m[Error]\033[0m please install 'jq' manually."
+echo -e "${BLUE}╔══════════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}║    FERZDEVZ FPAWN PRO - LINUX INSTALLER      ║${NC}"
+echo -e "${BLUE}╚══════════════════════════════════════════════╝${NC}"
+
+# Check for Go
+if ! command -v go &> /dev/null
+then
+    echo -e "${RED}[Error]${NC} Go is not installed. Please install Go (1.20+) first."
     exit 1
 fi
 
-if ! command -v unzip &> /dev/null; then
-    echo -e "\033[0;31m[Error]\033[0m please install 'unzip' manually."
-    exit 1
-fi
+# Build logic
+echo -e "${GREEN}[1/3]${NC} Compiling FPAWN Pro Engine..."
+go build -ldflags="-s -w" -o fpawn ./cmd/fpawn
 
-# 1. Prepare Directory
-mkdir -p "$INSTALL_DIR"
-mkdir -p "$BIN_DIR"
+# Installation logic
+echo -e "${GREEN}[2/3]${NC} Deploying binary to local path..."
+mkdir -p "$HOME/.local/bin"
+mv fpawn "$HOME/.local/bin/fpawn"
+chmod +x "$HOME/.local/bin/fpawn"
 
-# 2. Copy Assets
-echo -e "\033[0;36m[Copy]\033[0m Migrating engines and libraries..."
-cp -r qawno "$INSTALL_DIR/"
-cp -r pawno "$INSTALL_DIR/"
-cp -r bin "$INSTALL_DIR/"
-cp -r lib "$INSTALL_DIR/"
-cp fpawn "$INSTALL_DIR/"
-cp plugin_db.sh "$INSTALL_DIR/"
-
-# 3. Validating Permissions
-chmod +x "$INSTALL_DIR/fpawn"
-chmod +x "$INSTALL_DIR/qawno/pawncc"
-# Permissions for wine exe usually don't matter, but good to check
-
-# 4. Global Link
-echo -e "\033[0;36m[Link]\033[0m Registering command..."
-rm -f "$BIN_DIR/fpawn"
-ln -s "$INSTALL_DIR/fpawn" "$BIN_DIR/fpawn"
-
-# 5. Path Check
+# Environment check
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    echo -e "\033[0;33m[Path]\033[0m Adding ~/.local/bin to PATH..."
+    echo -e "${BLUE}[Info]${NC} Adding ~/.local/bin to PATH in .bashrc..."
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
-    export PATH="$HOME/.local/bin:$PATH"
+    echo -e "${GREEN}[Success]${NC} PATH updated. Please restart your terminal or run 'source ~/.bashrc'."
 fi
 
-echo -e "\033[0;32m[Success]\033[0m fpawn is now installed system-wide!"
-echo -e "You can now type \033[1mfpawn\033[0m from ANY folder."
-echo -e "Restart your terminal to apply changes fully."
+# Configuration setup
+echo -e "${GREEN}[3/3]${NC} Initializing Proprietary Core..."
+mkdir -p "$HOME/.ferzdevz/fpawn"
+
+echo -e "\n${GREEN}──────────────────────────────────────────────────${NC}"
+echo -e "${GREEN}  Installation Complete!${NC}"
+echo -e "  Run 'fpawn' to launch the Power Suite."
+echo -e "${GREEN}──────────────────────────────────────────────────${NC}"

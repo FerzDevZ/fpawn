@@ -1,0 +1,216 @@
+# fpawn Master - Modular Architecture v25.0
+# Created for: FerzDevZ
+# Version: 25.0 (Intelligence Frontier)
+# Engines: qawno (open.mp) & pawno (Legacy SAMP)
+# Repo: https://github.com/FerzDevZ/fpawn
+
+# === INITIALIZATION ===
+
+# Determine base directory
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" 
+done
+BASE_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
+# === LOAD MODULES ===
+
+# Core module must be loaded first
+source "$BASE_DIR/lib/core.sh"
+
+# Initialize directories
+core_init_dirs
+
+# Load remaining modules
+source "$BASE_DIR/lib/compiler.sh"
+source "$BASE_DIR/lib/search.sh"
+source "$BASE_DIR/lib/analysis.sh"
+source "$BASE_DIR/lib/tools.sh"
+source "$BASE_DIR/lib/ui.sh"
+source "$BASE_DIR/lib/github.sh"
+source "$BASE_DIR/lib/plugins.sh"
+
+# Load configuration
+core_load_config
+
+# === MAIN ENTRY POINT ===
+
+# If no arguments, show dashboard
+if [ $# -eq 0 ]; then
+    ui_show_dashboard
+    exit 0
+fi
+
+# === CLI MODE ===
+
+PASSED_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        # Tools
+        --watch)
+            compiler_watch_mode "$2"
+            exit 0
+            ;;
+        --sandbox)
+            tools_snippet_sandbox
+            exit 0
+            ;;
+        --polish)
+            tools_code_polisher "$2"
+            exit 0
+            ;;
+        --init)
+            tools_template_architect
+            exit 0
+            ;;
+        --repair)
+            tools_code_artisan "$2"
+            exit 0
+            ;;
+        --restore)
+            tools_safeguard_restore "$2"
+            exit 0
+            ;;
+        
+        # Analysis
+        --analyze)
+            analysis_static_analyst "$2"
+            exit 0
+            ;;
+        --doctor)
+            analysis_doctor "$2"
+            exit 0
+            ;;
+        --analytics)
+            analysis_performance_dashboard
+            exit 0
+            ;;
+        --diagnose)
+            analysis_neural_diagnose
+            exit 0
+            ;;
+        --scan)
+            analysis_project_scanner
+            exit 0
+            ;;
+        
+        # Search
+        --search)
+            search_dynamic_search "$2"
+            exit 0
+            ;;
+        
+        # Plugins
+        --plugin)
+            shift
+            case $1 in
+                install)
+                    plugins_install "$2"
+                    exit 0
+                    ;;
+                list)
+                    plugins_list "$2"
+                    exit 0
+                    ;;
+                *)
+                    core_error "Unknown plugin command: $1"
+                    echo "Usage: fpawn --plugin [install|list] <name|filter>"
+                    exit 1
+                    ;;
+            esac
+            ;;
+        
+        # System
+        --refresh)
+            compiler_library_updater
+            exit 0
+            ;;
+        --update-self)
+            tools_self_update
+            exit 0
+            ;;
+        --lang)
+            core_set_lang "$2"
+            exit 0
+            ;;
+        
+        # Intelligence (v24.0)
+        --explain)
+            analysis_explain_error "$2"
+            exit 0
+            ;;
+        --audit)
+            analysis_security_audit "$2"
+            exit 0
+            ;;
+        --suggest)
+            analysis_suggestion_engine "$2"
+            exit 0
+            ;;
+        --lint)
+            analysis_linter "$2"
+            exit 0
+            ;;
+            
+        # Automation (v25.0)
+        --matrix)
+            compiler_matrix_build "$2"
+            exit 0
+            ;;
+        --bench)
+            compiler_micro_bench "$2"
+            exit 0
+            ;;
+        --bundle)
+            tools_project_bundler
+            exit 0
+            ;;
+        --crunch)
+            tools_server_cruncher
+            exit 0
+            ;;
+        --verify-plugins)
+            plugins_verify_integrity
+            exit 0
+            ;;
+        --deps)
+            plugins_dependency_graph
+            exit 0
+            ;;
+        --inspect)
+            analysis_hex_inspect "$2"
+            exit 0
+            ;;
+        --rcon)
+            tools_rcon_bridge "$2"
+            exit 0
+            ;;
+        --guard)
+            tools_code_guardian "$2"
+            exit 0
+            ;;
+        
+        # Compilation
+        *.pwn)
+            PASSED_ARGS+=( "$1" )
+            shift
+            ;;
+        
+        # Unknown
+        *)
+            shift
+            ;;
+    esac
+done
+
+# If .pwn file provided, compile
+if [ ${#PASSED_ARGS[@]} -gt 0 ]; then
+    compiler_execute "auto" "auto" "${PASSED_ARGS[@]}"
+    exit $?
+fi
+
+# Fallback to dashboard
+ui_show_dashboard

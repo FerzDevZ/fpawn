@@ -87,6 +87,16 @@ PLUGIN_DATABASE=(
     # === GAMEMODE BASES ===
     "scavenge-survive|Gamemode|Both|https://github.com/Southclaws/ScavengeSurvive.git|p_desc_gm|"
     "grand-larcency|Gamemode|Legacy|https://github.com/pawn-lang/sa-mp-grand-larcency.git|p_desc_gm|"
+    "samp-voice|Gameplay|Both|https://github.com/CyberMor/samp-voice.git|p_desc_game|"
+    "SAMPCAC|Security|Legacy|https://github.com/SAMPCAC/SAMPCAC-Plugin.git|p_desc_sec|"
+    "MapStreamer|World|Both|https://github.com/maddinat0r/samp-map-streamer.git|p_desc_world|"
+    "DNS|Network|Both|https://github.com/Incognito/samp-dns-plugin.git|p_desc_net|"
+    "open-rp|Gamemode|Both|https://github.com/pawn-lang/open-rp.git|p_desc_gm|"
+    "samp-ml|Advanced|Legacy|https://github.com/Y-Less/samp-ml.git|p_desc_adv|"
+    "rust-mysql|Database|OMP|https://github.com/pblueg/rust-mysql.git|p_desc_db|"
+    "pawn-uuid|Utility|Both|https://github.com/Southclaws/pawn-uuid.git|p_desc_util|"
+    "pawn-chrono|Utility|Both|https://github.com/Southclaws/pawn-chrono.git|p_desc_util|"
+    "pawn-test|Core|Both|https://github.com/Southclaws/pawn-test.git|p_desc_core|"
 )
 
 # Get plugin info by name
