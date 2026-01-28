@@ -4,20 +4,22 @@
 
 # === MARKETPLACE HUB ===
 
+# === MARKETPLACE HUB ===
+
 function search_marketplace_hub() {
-    echo -e " ${LBLUE}🌌 fpawn Marketplace - Synthesis Catalog${NC}"
+    echo -e " ${LBLUE}$(msg mkt_title)${NC}"
     
     # Show last search from history
     [ -f "$HOME/.ferzdevz/fpawn/history" ] && \
-        echo -e " ${BOLD}Last Search:${NC} $(tail -n 1 "$HOME/.ferzdevz/fpawn/history" 2>/dev/null)"
+        printf " ${BOLD}$(msg mkt_last_search)${NC}\n" "$(tail -n 1 "$HOME/.ferzdevz/fpawn/history" 2>/dev/null)"
     
     echo -e " [1] openmultiplayer/open.mp-stdlib (Core Library)"
     echo -e " [2] samp-incognito/samp-streamer-plugin (Streamer)"
     echo -e " [3] pBlueG/SA-MP-MySQL (Database)"
     echo -e " [4] Y-Less/sscanf (Parser)"
-    echo -e " [5] Search Custom Galaxy..."
+    echo -e " [5] $(msg mkt_custom)"
     echo ""
-    read -p " Select ID: " MCHOICE
+    read -p " $(msg mkt_select)" MCHOICE
     
     case $MCHOICE in
         1) search_repo_cloner "https://github.com/openmultiplayer/open.mp-stdlib" "open.mp-stdlib" ;;
@@ -33,7 +35,7 @@ function search_marketplace_hub() {
 
 function search_dynamic_search() {
     local QUERY=$1
-    echo -e "${BLUE}[Neural]${NC} Accessing GitHub Vault with Intelligent Ranking..."
+    echo -e "${BLUE}[Neural]${NC} $(msg neu_vault)"
     
     local JSON=$(curl -s "https://api.github.com/search/repositories?q=${QUERY}+pawn+language:Pawn&sort=stars&per_page=50")
     
@@ -70,7 +72,7 @@ function search_dynamic_search() {
     local RESULTS=$(echo -e "$SCORED" | sort -t'|' -k1 -rn | head -n 10)
     
     if [ -z "$RESULTS" ]; then
-        core_warning "No repositories found for '${CYAN}$QUERY${NC}'"
+        core_warning "$(printf "$(msg neu_no_repos)" "${CYAN}$QUERY${NC}")"
         return 1
     fi
     
@@ -97,13 +99,13 @@ function search_dynamic_search() {
         
         echo -e " [$i] ${REL} ${BOLD}${CYAN}$FNAME${NC}"
         [ -n "$FDESC" ] && [[ "$FDESC" != "null" ]] && \
-            echo -e "     ${MAGENTA}Note:${NC} $FDESC"
-        echo -e "     ${BLUE}Link:${NC} $FURL"
+            echo -e "     ${MAGENTA}$(msg neu_note):${NC} $FDESC"
+        echo -e "     ${BLUE}$(msg neu_link):${NC} $FURL"
         ((i++))
     done
     unset IFS
     
-    read -p " Index to Clone [1-10]: " PICK
+    read -p " $(msg neu_clone_prompt)" PICK
     if [[ "$PICK" =~ ^[1-9]$|^10$ ]]; then
         search_repo_cloner "${URLS[$PICK-1]}" "${NAMES[$PICK-1]}"
     fi
@@ -122,32 +124,31 @@ function search_repo_cloner() {
     local URL=$1
     local NAME=$2
     
-    echo -e "${BLUE}[Cloner]${NC} Syncing $NAME..."
+    echo -e "${BLUE}[Cloner]${NC} $(printf "$(msg clo_syncing)" "$NAME")"
     
     # 0. Existence check
     if [ -d "$NAME" ]; then
-        core_warning "Directory '$NAME' already exists. Synchronizing with existing origin..."
+        core_warning "$(printf "$(msg clo_exist)" "$NAME")"
         (cd "$NAME" && git remote set-url origin "$URL" && git pull origin main 2>/dev/null)
-        core_success "Synchronized existing repository."
+        core_success "$(msg clo_sync_success)"
         return 0
     fi
-
+ 
     # 1. Pre-validation
     if ! search_validate_repo "$URL"; then
-        core_error "Repository or file is inaccessible: $URL (404 or Private)"
-        echo -e "${YELLOW}[Neural]${NC} This plugin might have been archived or moved."
+        core_error "$(printf "$(msg clo_fail_access)" "$URL")"
+        echo -e "${YELLOW}[Neural]${NC} $(msg clo_archived)"
         return 1
     fi
 
     # 2. Non-interactive Clone
-    # GIT_TERMINAL_PROMPT=0 prevents interactive credential prompts
     GIT_TERMINAL_PROMPT=0 git clone --depth 1 "$URL" "$NAME" 2>/dev/null
     
     if [ $? -eq 0 ]; then
         core_success "$(msg success)"
         core_git_commit "Installed repository $NAME"
     else
-        core_error "Failed to clone $NAME"
+        core_error "$(printf "$(msg clo_fail)" "$NAME")"
         return 1
     fi
 }

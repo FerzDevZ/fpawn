@@ -6,14 +6,16 @@
 INSTALL_DIR="$HOME/.ferzdevz/fpawn"
 BIN_DIR="$HOME/.local/bin"
 
-echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v19.5 (Live Reload Engine Edition)..."
+echo -e "\033[0;34m[Installer]\033[0m Installing fpawn v25.0 (Intelligence Frontier)..."
 
-# 0. Prepare Directories
-mkdir -p "$INSTALL_DIR/cache/includes"
-
-# 0. Check Dependencies (Assumption: Environment is Prepared)
+# 0. Check Dependencies
 if ! command -v jq &> /dev/null; then
     echo -e "\033[0;31m[Error]\033[0m please install 'jq' manually."
+    exit 1
+fi
+
+if ! command -v unzip &> /dev/null; then
+    echo -e "\033[0;31m[Error]\033[0m please install 'unzip' manually."
     exit 1
 fi
 

@@ -1,8 +1,6 @@
-#!/bin/bash
-
-# fpawn Master - Modular Architecture v19.0
+# fpawn Master - Modular Architecture v25.0
 # Created for: FerzDevZ
-# Version: 19.5 (Live Reload Engine Edition)
+# Version: 25.0 (Intelligence Frontier)
 # Engines: qawno (open.mp) & pawno (Legacy SAMP)
 # Repo: https://github.com/FerzDevZ/fpawn
 
@@ -31,6 +29,7 @@ source "$BASE_DIR/lib/search.sh"
 source "$BASE_DIR/lib/analysis.sh"
 source "$BASE_DIR/lib/tools.sh"
 source "$BASE_DIR/lib/ui.sh"
+source "$BASE_DIR/lib/github.sh"
 source "$BASE_DIR/lib/plugins.sh"
 
 # Load configuration
@@ -67,10 +66,26 @@ while [[ $# -gt 0 ]]; do
             tools_template_architect
             exit 0
             ;;
+        --repair)
+            tools_code_artisan "$2"
+            exit 0
+            ;;
+        --restore)
+            tools_safeguard_restore "$2"
+            exit 0
+            ;;
         
         # Analysis
         --analyze)
-            analysis_static_analyst
+            analysis_static_analyst "$2"
+            exit 0
+            ;;
+        --doctor)
+            analysis_doctor "$2"
+            exit 0
+            ;;
+        --analytics)
+            analysis_performance_dashboard
             exit 0
             ;;
         --diagnose)
@@ -119,6 +134,62 @@ while [[ $# -gt 0 ]]; do
             ;;
         --lang)
             core_set_lang "$2"
+            exit 0
+            ;;
+        
+        # Intelligence (v24.0)
+        --explain)
+            analysis_explain_error "$2"
+            exit 0
+            ;;
+        --audit)
+            analysis_security_audit "$2"
+            exit 0
+            ;;
+        --suggest)
+            analysis_suggestion_engine "$2"
+            exit 0
+            ;;
+        --lint)
+            analysis_linter "$2"
+            exit 0
+            ;;
+            
+        # Automation (v25.0)
+        --matrix)
+            compiler_matrix_build "$2"
+            exit 0
+            ;;
+        --bench)
+            compiler_micro_bench "$2"
+            exit 0
+            ;;
+        --bundle)
+            tools_project_bundler
+            exit 0
+            ;;
+        --crunch)
+            tools_server_cruncher
+            exit 0
+            ;;
+        --verify-plugins)
+            plugins_verify_integrity
+            exit 0
+            ;;
+        --deps)
+            plugins_dependency_graph
+            exit 0
+            ;;
+        --inspect)
+            analysis_hex_inspect "$2"
+            exit 0
+            ;;
+        --rcon)
+            tools_rcon_bridge "$2"
+            exit 0
+            ;;
+        --guard)
+            tools_code_guardian "$2"
             exit 0
             ;;
         
